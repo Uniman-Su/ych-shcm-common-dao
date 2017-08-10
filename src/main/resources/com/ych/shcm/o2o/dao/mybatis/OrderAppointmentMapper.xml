@@ -107,9 +107,9 @@ shop_id
         <if test="needOrderInfo" >
             ,
             <include refid="com.ych.shcm.o2o.dao.mybatis.OrderMapper.orderPrefixCols">
-            <property name="tableName" value="to"/>
-            <property name="colPrefix" value="to_"/>
-        </include>
+                <property name="tableName" value="to"/>
+                <property name="colPrefix" value="to_"/>
+            </include>
             ,
             <include refid="com.ych.shcm.o2o.dao.mybatis.OrderServicePackMapper.orderServicePackPrefixCols">
                 <property name="tableName" value="tp"/>
@@ -118,12 +118,20 @@ shop_id
         </if>
         FROM t_order_appointment ta
         <if test="needOrderInfo or userId != null" >
-           JOIN t_order `to` ON ta.order_id = `to`.id
+            JOIN t_order `to` ON ta.order_id = `to`.id
             <if test="needOrderInfo" >
                 JOIN t_order_service_pack  tp ON `to`.id =  tp.order_id
             </if>
         </if>
         <include refid="selectOrderAppointmentListCondition"/>
+        <choose>
+            <when test="sort != null and sort.length() > 0">ORDER BY `${sort}`
+                <if test="order != null">${order}</if>
+            </when>
+            <otherwise>
+                ORDER BY id DESC
+            </otherwise>
+        </choose>
         <if test="startIndex != null">LIMIT #{startIndex,jdbcType=NUMERIC}, #{pageSize,jdbcType=NUMERIC}</if>
     </select>
 
