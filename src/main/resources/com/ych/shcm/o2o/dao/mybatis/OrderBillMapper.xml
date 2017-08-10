@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.OrderBillMapper">
+
+    <!-- 订单发票 -->
+    <resultMap id="orderBill" type="com.ych.shcm.o2o.model.OrderBill">
+        <id column="id" property="id" jdbcType="NUMERIC"/>
+        <result column="order_id" property="orderId" jdbcType="NUMERIC"/>
+        <result column="tax_no" property="taxNo" jdbcType="VARCHAR"/>
+        <result column="company" property="company" jdbcType="VARCHAR"/>
+        <result column="company_addr" property="companyAddr" jdbcType="VARCHAR"/>
+        <result column="company_phone" property="companyPhone" jdbcType="VARCHAR"/>
+        <result column="bank" property="bank" jdbcType="VARCHAR"/>
+        <result column="bank_account" property="bankAccount" jdbcType="VARCHAR"/>
+        <result column="deliver_addr" property="deliverAddr" jdbcType="VARCHAR"/>
+        <result column="ptc" property="ptc" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+
+    </resultMap>
+
+
+    <!-- 订单发票的列 -->
+    <sql id="orderBillCols">
+`id`,
+`order_id`,
+`tax_no`,
+`company`,
+`company_addr`,
+`company_phone`,
+`bank`,
+`bank_account`,
+`ptc`,
+`phone`,
+`deliver_addr`
+    </sql>
+    <sql id="orderBillPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`order_id` AS `${colPrefix}order_id`,
+`${tableName}`.`tax_no` AS `${colPrefix}tax_no`,
+`${tableName}`.`company` AS `${colPrefix}company`,
+`${tableName}`.`company_addr` AS `${colPrefix}company_addr`,
+`${tableName}`.`company_phone` AS `${colPrefix}company_phone`,
+`${tableName}`.`bank` AS `${colPrefix}bank`,
+`${tableName}`.`bank_account` AS `${colPrefix}bank_account`,
+`${tableName}`.`ptc` AS `${colPrefix}ptc`,
+`${tableName}`.`phone` AS `${colPrefix}phone`,
+`${tableName}`.`deliver_addr` AS `${colPrefix}deliver_addr`
+    </sql>
+
+    <!-- 查询订单发票详情 -->
+    <select id="selectById" parameterType="decimal" resultMap="orderBill">
+        SELECT
+        <include refid="orderBillCols"/>
+        FROM t_order_bill_apply WHERE id = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 更新订单发票 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.OrderBill">
+        UPDATE t_order_bill_apply
+        SET
+        order_id = #{orderId,jdbcType=NUMERIC},
+        tax_no = #{taxNo,jdbcType=VARCHAR},
+        company_addr = #{companyAddr,jdbcType=VARCHAR},
+        company_phone = #{companyPhone,jdbcType=VARCHAR},
+        bank = #{bank,jdbcType=VARCHAR},
+        bank_account = #{bankAccount,jdbcType=VARCHAR},
+        deliver_addr = #{deliverAddr,jdbcType=VARCHAR},
+        ptc = #{ptc,jdbcType=VARCHAR},
+        phone = #{phone,jdbcType=VARCHAR},
+        create_time = #{createTime,jdbcType=TIMESTAMP}
+        WHERE id = #{id,jdbcType=NUMERIC}
+    </update>
+
+    <!-- 插入订单发票 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.OrderBill" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_order_bill_apply (
+`order_id`,
+`tax_no`,
+`company`,
+`company_addr`,
+`company_phone`,
+`bank`,
+`bank_account`,
+`deliver_addr`,
+`ptc`,
+`phone`
+        ) VALUES (
+#{orderId,jdbcType=NUMERIC},
+#{taxNo,jdbcType=VARCHAR},
+#{company,jdbcType=VARCHAR},
+#{companyAddr,jdbcType=VARCHAR},
+#{companyPhone,jdbcType=VARCHAR},
+ #{bank,jdbcType=VARCHAR},
+#{bankAccount,jdbcType=VARCHAR},
+#{deliverAddr,jdbcType=VARCHAR},
+#{ptc,jdbcType=VARCHAR},
+#{phone,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <!-- 删除订单发票 -->
+    <select id="delete" parameterType="decimal">
+        DELETE
+        FROM t_order_bill_apply WHERE id = #{value,jdbcType=NUMERIC}
+    </select>
+
+
+    <!-- 查询订单发票详情 -->
+    <select id="selectByOrderId" parameterType="decimal" resultMap="orderBill">
+        SELECT
+        <include refid="orderBillCols"/>
+        FROM t_order_bill_apply WHERE order_id = #{value,jdbcType=NUMERIC}
+    </select>
+
+</mapper>

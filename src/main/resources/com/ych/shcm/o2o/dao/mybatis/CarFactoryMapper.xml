@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.CarFactoryMapper">
+
+  <!-- 车型制造厂家 -->
+  <resultMap type="com.ych.shcm.o2o.model.CarFactory" id="carFactory">
+    <id column="id" property="id" jdbcType="NUMERIC"/>
+    <result column="name" property="name" jdbcType="VARCHAR"/>
+    <result column="first_char" property="firstChar" jdbcType="CHAR"/>
+    <result column="enabled" property="enabled" jdbcType="NUMERIC"/>
+    <result column="modifier_id" property="modifierId" jdbcType="NUMERIC"/>
+    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP"/>
+  </resultMap>
+  
+  <!-- 车型工厂关系映射 -->
+  <resultMap type="com.ych.shcm.o2o.model.CarBrandFactory" id="carBrandFactory">
+    <result column="brand_id" property="brandId" jdbcType="NUMERIC"/>
+    <result column="factory_id" property="factoryId" jdbcType="NUMERIC"/>
+    <result column="modifier_id" property="modifierId" jdbcType="NUMERIC"/>
+    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP"/>
+  </resultMap>
+  
+  <!-- 车型制造厂家的列 -->
+  <sql id="carFactoryCols">
+`id`,
+`name`,
+`first_char`,
+`enabled`,
+`modifier_id`,
+`modify_time`
+  </sql>
+  <sql id="carFactoryPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`name` AS `${colPrefix}name`,
+`${tableName}`.`first_char` AS `${colPrefix}first_char`,
+`${tableName}`.`enabled` AS `${colPrefix}enabled`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+  </sql>
+  
+  <!-- 品牌到制造厂家的列 -->
+  <sql id="carBrandFactoryCols">
+`brand_id`,
+`factory_id`,
+`modifier_id`,
+`modify_time`
+  </sql>
+  <sql id="carBrandFactoryPrefixCols">
+`${tableName}`.`brand_id` AS `${colPrefix}brand_id`,
+`${tableName}`.`factory_id` AS `${colPrefix}factory_id`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+  </sql>
+  
+  <!-- 根据ID查询车型制造厂家 -->
+  <select id="selectById" parameterType="map" resultMap="carFactory">
+SELECT <include refid="carFactoryCols" />
+  FROM t_car_factory
+ WHERE id = #{id,jdbcType=NUMERIC}
+<if test="lock == true">FOR UPDATE</if>
+  </select>
+  
+  <!-- 插入车型制造厂家 -->
+  <insert id="insert" parameterType="com.ych.shcm.o2o.model.CarFactory" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_car_factory (
+`name`,
+`first_char`,
+`enabled`,
+`modifier_id`
+) VALUES (
+#{name,jdbcType=VARCHAR},
+#{firstChar,jdbcType=CHAR},
+#{enabled,jdbcType=NUMERIC},
+#{modifierId,jdbcType=NUMERIC}
+)
+  </insert>
+  
+  <!-- 批量插入车型制造厂家 -->
+  <insert id="batchInsert" parameterType="list">
+INSERT INTO t_car_factory (
+`name`,
+`first_char`,
+`enabled`,
+`modifier_id`
+) VALUES <foreach collection="list" item="factory" separator=",">(
+#{factory.name,jdbcType=VARCHAR},
+#{factory.firstChar,jdbcType=CHAR},
+#{factory.enabled,jdbcType=NUMERIC},
+#{factory.modifierId,jdbcType=NUMERIC}
+)</foreach>
+  </insert>
+  
+  <!-- 导入车型制造厂家,导入与插入不同的是导入认为数据已经存在ID -->
+  <insert id="import" parameterType="list">
+INSERT INTO t_car_factory (
+`id`,
+`name`,
+`first_char`,
+`enabled`,
+`modifier_id`
+) VALUES <foreach collection="list" item="factory" separator=",">(
+#{factory.id,jdbcType=NUMERIC},
+#{factory.name,jdbcType=VARCHAR},
+#{factory.firstChar,jdbcType=CHAR},
+#{factory.enabled,jdbcType=NUMERIC},
+#{factory.modifierId,jdbcType=NUMERIC}
+)</foreach>
+ON DUPLICATE KEY UPDATE
+  name = VALUES(name),
+  first_char = VALUES(first_char),
+  modifier_id = VALUES(modifier_id),
+  modify_time = CURRENT_TIMESTAMP
+  </insert>
+  
+  <!-- 更新车型制造厂家 -->
+  <update id="update" parameterType="com.ych.shcm.o2o.model.CarFactory">
+UPDATE t_car_factory
+   SET `name` = #{name,jdbcType=VARCHAR},
+       `first_char` = #{firstChar,jdbcType=CHAR},
+       `enabled` = #{enabled,jdbcType=NUMERIC},
+       `modifier_id` = #{modifierId,jdbcType=NUMERIC},
+       `modify_time` = CURRENT_TIMESTAMP
+ WHERE `id` = #{id,jdbcType=NUMERIC}
+  </update>
+  
+  <!-- 根据ID删除记录 -->
+  <delete id="deleteById" parameterType="decimal">
+DELETE FROM t_car_factory WHERE `id` = #{id,jdbcType=NUMERIC}
+  </delete>
+  
+  <!-- 查询车型制造厂家列表 -->
+  <sql id="selectListCondition">
+<where>
+  <if test="brandId != null">id IN (
+    SELECT factory_id
+      FROM t_car_brand_factory
+     WHERE brand_id = #{brandId,jdbcType=NUMERIC}
+  )</if>
+  <if test="name != null and name.length() > 0">AND name LIKE CONCAT('%', #{name,jdbcType=VARCHAR}, '%')</if>
+  <if test="firstChar != null and firstChar.length() > 0">AND first_char = #{firstChar,jdbcType=CHAR}</if>
+  <if test="enabled != null">AND enabled = #{enabled,jdbcType=NUMERIC}</if>
+</where>
+  </sql>
+  <select id="selectList" parameterType="com.ych.shcm.o2o.parameter.QueryCarFactoryListParameter" resultMap="carFactory">
+SELECT <include refid="carFactoryPrefixCols">
+         <property name="tableName" value="tcf"/>
+         <property name="colPrefix" value=""/>
+       </include>
+  FROM t_car_factory AS tcf
+<include refid="selectListCondition" />
+<if test="sorts != null and sorts.size() > 0">ORDER BY <foreach collection="sorts" separator="," item="sort">${sort.sort}<if test="sort.order != null"> ${sort.order}</if></foreach></if>
+<if test="startIndex != null">LIMIT #{startIndex,jdbcType=NUMERIC}, #{pageSize,jdbcType=NUMERIC}</if>
+  </select>
+  <select id="selectList_count" parameterType="com.ych.shcm.o2o.parameter.QueryCarFactoryListParameter" resultType="long">
+SELECT COUNT(1)
+  FROM t_car_factory AS tcf
+<include refid="selectListCondition" />
+  </select>
+  
+  <!-- 插入品牌工厂关系映射 -->
+  <insert id="insertBrandFactory" parameterType="com.ych.shcm.o2o.model.CarBrandFactory">
+INSERT INTO t_car_brand_factory (
+`brand_id`,
+`factory_id`,
+`modifier_id`
+) VALUES (
+#{brandId,jdbcType=NUMERIC},
+#{factoryId,jdbcType=VARCHAR},
+#{modifierId,jdbcType=NUMERIC}
+) ON DUPLICATE KEY UPDATE
+  modifier_id = VALUES(modifier_id)
+  </insert>
+  
+  <!-- 批量插入品牌工厂关系映射 -->
+  <insert id="batchInsertBrandFactory" parameterType="list">
+INSERT INTO t_car_brand_factory (
+`brand_id`,
+`factory_id`,
+`modifier_id`
+) VALUES <foreach collection="list" item="factory" separator=",">(
+#{factory.brandId,jdbcType=NUMERIC},
+#{factory.factoryId,jdbcType=VARCHAR},
+#{factory.modifierId,jdbcType=NUMERIC}
+)</foreach>
+ON DUPLICATE KEY UPDATE
+  modifier_id = VALUES(modifier_id)
+  </insert>
+  
+  <!-- 删除品牌工厂映射 -->
+  <delete id="deleteBrandFactory" parameterType="com.ych.shcm.o2o.model.CarBrandFactory">
+DELETE FROM t_car_brand_factory WHERE brand_id = #{brandId,jdbcType=NUMERIC} AND factory_id = #{factoryId,jdbcType=VARCHAR}
+  </delete>
+
+</mapper>

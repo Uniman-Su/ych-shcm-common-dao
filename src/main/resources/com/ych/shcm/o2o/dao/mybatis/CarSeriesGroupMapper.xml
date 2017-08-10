@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.CarSeriesGroupMapper">
+
+    <!-- 车系组 -->
+    <resultMap id="seriesGroup" type="com.ych.shcm.o2o.model.CarSeriesGroup">
+        <id column="id" property="id" jdbcType="NUMERIC" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="status" property="status" jdbcType="NUMERIC" />
+        <result column="modifier_id" property="modifierId" jdbcType="NUMERIC" />
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <!-- 车型组的车系 -->
+    <resultMap id="seriesGroupSeries" type="com.ych.shcm.o2o.model.CarSeriesGroupSeries">
+        <id column="id" property="id" jdbcType="NUMERIC" />
+        <result column="group_id" property="groupId" jdbcType="NUMERIC" />
+        <result column="series_id" property="seriesId" jdbcType="NUMERIC" />
+        <result column="modifier_id" property="modifierId" jdbcType="NUMERIC" />
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+        <association property="series" resultMap="com.ych.shcm.o2o.parameter.CarSeriesMapper.carSeries" columnPrefix="tcs_" />
+    </resultMap>
+
+    <!-- 车系组的列 -->
+    <sql id="seriesGroupCols">
+`id`,
+`name`,
+`status`,
+`modifier_id`,
+`modify_time`
+    </sql>
+    <sql id="seriesGroupPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`name` AS `${colPrefix}name`,
+`${tableName}`.`status` AS `${colPrefix}status`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+    </sql>
+
+    <!-- 车系组车系的列 -->
+    <sql id="seriesGroupSeriesCols">
+`id`,
+`group_id`,
+`series_id`,
+`modifier_id`,
+`modify_time`
+    </sql>
+    <sql id="seriesGroupSeriesPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`group_id` AS `${colPrefix}group_id`,
+`${tableName}`.`series_id` AS `${colPrefix}series_id`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+    </sql>
+
+    <!-- 插入 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.CarSeriesGroup" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_car_series_group (
+`name`,
+`status`,
+`modifier_id`
+) VALUES (
+#{name,jdbcType=VARCHAR},
+#{status,jdbcType=NUMERIC},
+#{modifierId,jdbcType=NUMERIC}
+)
+    </insert>
+
+    <!-- 删除 -->
+    <delete id="delete" parameterType="com.ych.shcm.o2o.model.CarSeriesGroup">
+DELETE FROM t_car_series_group
+ WHERE `id` = #{id,jdbcType=NUMERIC}
+   <if test="modifyTime != null">AND `modify_time` = #{modifyTime,jdbcType=TIMESTAMP}</if>
+    </delete>
+
+    <!-- 修改车系组 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.CarSeriesGroup">
+UPDATE t_car_series_group
+   SET `name` = #{name,jdbcType=VARCHAR},
+       `status` = #{status,jdbcType=NUMERIC},
+       `modifier_id` = #{modifierId,jdbcType=NUMERIC},
+       `modify_time` = CURRENT_TIMESTAMP
+ WHERE `id` = #{id,jdbcType=NUMERIC}
+   AND `modify_time` = #{modifyTime,jdbcType=TIMESTAMP}
+    </update>
+
+    <!-- 根据ID查询车系组 -->
+    <select id="selectById" parameterType="decimal" resultMap="seriesGroup">
+SELECT <include refid="seriesGroupCols" />
+  FROM t_car_series_group
+ WHERE `id` = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 查询车系组列表 -->
+    <sql id="selectListCondition">
+<where>
+    <if test="statuses != null">AND
+        <choose>
+            <when test="statuses.size() == 1">tcsg.status = #{statuses[0],jdbcType=NUMERIC}</when>
+            <otherwise>tcsg.status IN (<foreach collection="statuses" item="status" separator=",">#{status,jdbcType=NUMERIC}</foreach>)</otherwise>
+        </choose>
+    </if>
+</where>
+    </sql>
+    <select id="selectList" parameterType="com.ych.shcm.o2o.parameter.QueryCarSeriesGroupParameter" resultMap="seriesGroup">
+SELECT <include refid="seriesGroupPrefixCols">
+           <property name="tableName" value="tcsg" />
+           <property name="colPrefix" value="" />
+       </include>
+  FROM t_car_series_group AS tcsg
+<include refid="selectListCondition" />
+<if test="startIndex != null">LIMIT #{startIndex,jdbcType=NUMERIC}, #{pageSize,jdbcType=NUMERIC}</if>
+    </select>
+    <select id="selectList_count" parameterType="com.ych.shcm.o2o.parameter.QueryCarSeriesGroupParameter" resultType="long">
+SELECT COUNT(1)
+  FROM t_car_series_group AS tcsg
+<include refid="selectListCondition" />
+    </select>
+
+    <!-- 插入车系 -->
+    <insert id="insertSeries" parameterType="collection">
+INSERT INTO t_car_series_group_series (
+`group_id`,
+`series_id`,
+`modifier_id`
+) VALUES <foreach collection="collection" item="groupSeries" separator=",">(
+#{groupId,jdbcType=NUMERIC},
+#{seriesId,jdbcType=NUMERIC},
+#{modifierId,jdbcType=NUMERIC}
+)</foreach>
+ON DUPLICATE KEY UPDATE
+  modifier_id = VALUES(modifier_id),
+  modify_time = VALUES(modify_time)
+    </insert>
+
+    <!-- 车系组车系 -->
+    <delete id="deleteSeries" parameterType="com.ych.shcm.o2o.model.CarSeriesGroupSeries">
+DELETE FROM t_car_series_group_series
+ WHERE `group_id` = #{groupId,jdbcType=NUMERIC}
+   AND `series_id` = #{seriesId,jdbcType=NUMERIC}
+    </delete>
+
+    <!-- 根据ID删除车系 -->
+    <delete id="deleteSeriesById" parameterType="collection">
+DELETE FROM t_car_series_group_series
+ WHERE <choose>
+           <when test="collection.size() == 1">`id` = #{collection,jdbcTypeNUMERIC}</when>
+           <otherwise>`id` IN (<foreach collection="collection" item="id" separator=",">#{id,jdbcType=NUMERIC}</foreach>)</otherwise>
+       </choose>
+    </delete>
+
+    <!-- 查询车系列表 -->
+    <sql id="selectSeriesListCondtion">
+<where>
+    <if test="groupId != null">tcsgs.`group_id` = #{groupId,jdbcType=NUMERIC}</if>
+    <if test="brandId != null">AND tcs.`brand_id` = #{brandId,jdbcType=NUMERIC}</if>
+    <if test="factoryId != null">AND tcs.`factory_id` = #{factoryId,jdbcType=NUMERIC}</if>
+</where>
+    </sql>
+    <select id="selectSeriesList" parameterType="com.ych.shcm.o2o.parameter.QueryCarSeriesGroupSeriesParameter" resultMap="seriesGroupSeries">
+SELECT <include refid="seriesGroupSeriesPrefixCols">
+           <property name="tableName" value="tcsgs" />
+           <property name="colPrefix" value="" />
+       </include>,
+       <include refid="com.ych.shcm.o2o.parameter.CarSeriesMapper.carSeriesPrefixCols">
+           <property name="tableName" value="tcs" />
+           <property name="colPrefix" value="tcs_" />
+       </include>
+  FROM t_car_series_group_series AS tcsgs
+       JOIN t_car_series AS tcs ON tcsgs.series_id = tcs.id
+       JOIN t_car_brand AS tcb ON tcb.id = tcs.brand_id
+       JOIN t_car_factory AS tcf ON tcf.id = tcs.factory_id
+<include refid="selectSeriesListCondtion" />
+ORDER BY tcb.first_char, tcb.name, tcf.first_char, tcf.name, tcs.first_char, tcs.name
+<if test="startIndex != null">LIMIT #{startIndex,jdbcType=NUMERIC}, #{pageSize,jdbcType=NUMERIC}</if>
+    </select>
+    <select id="selectSeriesList_count" parameterType="com.ych.shcm.o2o.parameter.QueryCarSeriesGroupSeriesParameter" resultType="long">
+SELECT COUNT(1)
+  FROM t_car_series_group_series AS tcsgs
+       JOIN t_car_series AS tcs ON tcsgs.series_id = tcs.id
+<include refid="selectSeriesListCondtion" />
+    </select>
+    <select id="selectCarSeriesGroupBySeriesId" resultType="decimal" resultMap="seriesGroup">
+
+        SELECT  <include refid="seriesGroupPrefixCols">
+        <property name="tableName" value="t1"/>
+        <property name="colPrefix" value=""/>
+    </include>
+        FROM t_car_series_group t1 LEFT JOIN t_car_series_group_series t2 on t1.id = t2.group_id WHERE  t2.series_id = #{value,jdbcType=NUMERIC}
+
+    </select>
+
+    <select id="selectServicePackByGroupId" resultType="decimal" resultMap="com.ych.shcm.o2o.dao.mybatis.ServicePackMapper.servicePack">
+
+        SELECT  <include refid="com.ych.shcm.o2o.dao.mybatis.ServicePackMapper.servicePackPrefixCols">
+        <property name="tableName" value="t2"/>
+        <property name="colPrefix" value=""/>
+    </include>,
+        t1.alias AS alias
+        FROM t_car_series_group_service_pack t1 LEFT JOIN t_service_pack t2 on t1.service_pack_id = t2.id WHERE  t1.group_id = #{value,jdbcType=NUMERIC}
+        AND t2.status = 0
+        order BY
+        t1.sort
+
+    </select>
+
+
+</mapper>

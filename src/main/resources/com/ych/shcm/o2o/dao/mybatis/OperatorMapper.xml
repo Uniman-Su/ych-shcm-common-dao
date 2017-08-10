@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.OperatorMapper">
+
+    <!-- 管理员 -->
+    <resultMap id="operator" type="com.ych.shcm.o2o.model.Operator">
+        <id column="id" property="id" jdbcType="NUMERIC" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="user_name" property="userName" jdbcType="VARCHAR" />
+        <result column="password" property="password" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="modifier_id" property="modifierId" jdbcType="NUMERIC" />
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <!-- 管理员的列 -->
+    <sql id="operatorCols">
+`id`,
+`name`,
+`user_name`,
+`password`,
+`create_time`,
+`modifier_id`,
+`modify_time`
+    </sql>
+    <sql id="operatorPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`name` AS `${colPrefix}name`,
+`${tableName}`.`user_name` AS `${colPrefix}user_name`,
+`${tableName}`.`password` AS `${colPrefix}password`,
+`${tableName}`.`create_time` AS `${colPrefix}create_time`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+    </sql>
+
+    <!-- 插入管理员信息 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.Operator" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_operator (
+`name`,
+`user_name`,
+`password`,
+`create_time`,
+`modifier_id`
+) VALUES (
+#{name,jdbcType=VARCHAR},
+#{userName,jdbcType=VARCHAR},
+#{password,jdbcType=VARCHAR},
+#{createTime,jdbcType=TIMESTAMP},
+#{modifierId,jdbcType=NUMERIC}
+)
+    </insert>
+
+    <!-- 更新 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.Operator">
+UPDATE t_operator
+   SET `name` = #{name,jdbcType=VARCHAR},
+       `user_name` = #{userName,jdbcType=VARCHAR},
+       `password` = #{password,jdbcType=VARCHAR},
+       `create_time` = #{createTime,jdbcType=TIMESTAMP},
+       `modifier_id` = #{modifierId,jdbcType=NUMERIC},
+       `modify_time` = CURRENT_TIMESTAMP
+ WHERE `id` = #{id,jdbcType=NUMERIC}
+   AND `modify_time` = #{modifyTime,jdbcType=TIMESTAMP}
+    </update>
+
+    <!-- 根据ID查询管理员 -->
+    <select id="selectById" parameterType="decimal" resultMap="operator">
+SELECT <include refid="operatorCols" />
+  FROM t_operator
+ WHERE `id` = #{id,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 根据用户名查询管理员 -->
+    <select id="selectByUsername" parameterType="string" resultMap="operator">
+SELECT <include refid="operatorCols" />
+  FROM t_operator
+ WHERE `user_name` = #{value,jdbcType=VARCHAR}
+    </select>
+
+</mapper>

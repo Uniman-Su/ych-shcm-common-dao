@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.UserThirdAuthMapper">
+
+    <!-- 第三方认证信息 -->
+    <resultMap id="userThirdAuth" type="com.ych.shcm.o2o.model.UserThirdAuth">
+        <id column="id" property="id" jdbcType="NUMERIC" />
+        <result column="user_id" property="userId" jdbcType="NUMERIC" />
+        <result column="type" property="type" jdbcType="NUMERIC" />
+        <result column="third_id" property="thirdId" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <!-- 第三方认证信息的列 -->
+    <sql id="userThirdAuthCols">
+`id`,
+`user_id`,
+`type`,
+`third_id`,
+`create_time`
+    </sql>
+    <sql id="userThirdAuthPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`user_id` AS `${colPrefix}user_id`,
+`${tableName}`.`type` AS `${colPrefix}type`,
+`${tableName}`.`third_id` AS `${colPrefix}third_id`,
+`${tableName}`.`create_time` AS `${colPrefix}create_time`
+    </sql>
+
+    <!-- 插入第三方认证信息 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.UserThirdAuth" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_user_third_auth (
+`user_id`,
+`type`,
+`third_id`
+) VALUES (
+#{userId,jdbcType=NUMERIC},
+#{type,jdbcType=NUMERIC},
+#{thirdId,jdbcType=VARCHAR}
+)
+    </insert>
+
+    <!-- 根据第三方认证类型查询第三方认证信息 -->
+    <select id="selectByThirdType" parameterType="map" resultMap="userThirdAuth">
+SELECT <include refid="userThirdAuthCols" />
+  FROM t_user_third_auth
+ WHERE `user_id` = #{userId,jdbcType=NUMERIC}
+   AND `type` = #{type,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 根据第三方ID查询第三方认证信息 -->
+    <select id="selectByThirdId" parameterType="map" resultMap="userThirdAuth">
+SELECT <include refid="userThirdAuthCols" />
+  FROM t_user_third_auth
+ WHERE `type` = #{type,jdbcType=NUMERIC}
+   AND `third_id` = #{thirdId,jdbcType=VARCHAR}
+    </select>
+
+</mapper>

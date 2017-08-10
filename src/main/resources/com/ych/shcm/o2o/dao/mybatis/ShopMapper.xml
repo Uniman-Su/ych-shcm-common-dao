@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.ShopMapper">
+
+    <!-- 店铺 -->
+    <resultMap id="shop" type="com.ych.shcm.o2o.model.Shop">
+        <id column="id" property="id" jdbcType="NUMERIC" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="area_id" property="areaId" jdbcType="VARCHAR" />
+        <result column="address" property="address" jdbcType="VARCHAR" />
+        <result column="phone" property="phone" jdbcType="VARCHAR" />
+        <result column="ptc" property="personToContact" jdbcType="VARCHAR" />
+        <result column="status" property="status" jdbcType="NUMERIC" />
+        <result column="average_score" property="averageScore" jdbcType="NUMERIC" />
+        <result column="evaluation_count" property="evaluationCount" jdbcType="NUMERIC" />
+        <result column="longitude" property="longitude" jdbcType="NUMERIC" />
+        <result column="latitude" property="latitude" jdbcType="NUMERIC" />
+        <result column="coordinate_type" property="coordinateType" jdbcType="NUMERIC" />
+        <result column="img_path" property="imagePath" jdbcType="VARCHAR" />
+        <result column="desc" property="desc" jdbcType="VARCHAR" />
+        <result column="sone_user_id" property="soneUserId" jdbcType="NUMERIC" />
+        <result column="distance" property="distance" jdbcType="NUMERIC"/>
+        <result column="modifier_id" property="modifierId" jdbcType="NUMERIC" />
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+        <association property="shopCarBrand" resultMap="com.ych.shcm.o2o.dao.mybatis.ShopCarBrandMapper.carBrand"
+                     columnPrefix="tb"/>
+    </resultMap>
+
+    <!-- 店铺图片 -->
+    <resultMap id="shopImage" type="com.ych.shcm.o2o.model.ShopImage">
+        <id column="id" property="id" jdbcType="NUMERIC" />
+        <result column="shop_id" property="shopId" jdbcType="NUMERIC" />
+        <result column="img_path" property="imagePath" jdbcType="VARCHAR" />
+        <result column="sort" property="sort" jdbcType="NUMERIC" />
+        <result column="modifier_id" property="modifierId" jdbcType="NUMERIC" />
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <!-- 店铺的列 -->
+    <sql id="shopCols">
+`id`,
+`name`,
+`area_id`,
+`address`,
+`phone`,
+`ptc`,
+`status`,
+`average_score`,
+`evaluation_count`,
+`longitude`,
+`latitude`,
+`coordinate_type`,
+`img_path`,
+`sone_user_id`,
+`modifier_id`,
+`modify_time`
+    </sql>
+    <sql id="shopDetailCols">
+<include refid="shopCols" />,
+`desc`
+    </sql>
+    <sql id="shopPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`name` AS `${colPrefix}name`,
+`${tableName}`.`area_id` AS `${colPrefix}area_id`,
+`${tableName}`.`address` AS `${colPrefix}address`,
+`${tableName}`.`phone` AS `${colPrefix}phone`,
+`${tableName}`.`ptc` AS `${colPrefix}ptc`,
+`${tableName}`.`status` AS `${colPrefix}status`,
+`${tableName}`.`average_score` AS `${colPrefix}average_score`,
+`${tableName}`.`evaluation_count` AS `${colPrefix}evaluation_count`,
+`${tableName}`.`longitude` AS `${colPrefix}longitude`,
+`${tableName}`.`latitude` AS `${colPrefix}latitude`,
+`${tableName}`.`coordinate_type` AS `${colPrefix}coordinate_type`,
+`${tableName}`.`img_path` AS `${colPrefix}img_path`,
+`${tableName}`.`sone_user_id` AS `${colPrefix}sone_user_id`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+    </sql>
+
+    <!-- 店铺图片列 -->
+    <sql id="shopImageCols">
+`id`,
+`shop_id`,
+`img_path`,
+`sort`,
+`modifier_id`,
+`modify_time`
+    </sql>
+    <sql id="shopImagePrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id,
+`${tableName}`.`shop_id` AS `${colPrefix}shop_id,
+`${tableName}`.`img_path` AS `${colPrefix}img_path,
+`${tableName}`.`sort` AS `${colPrefix}sort,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time
+    </sql>
+
+    <!-- 插入店铺信息 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.Shop" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_shop (
+`name`,
+`area_id`,
+`address`,
+`phone`,
+`ptc`,
+`status`,
+`average_score`,
+`evaluation_count`,
+`longitude`,
+`latitude`,
+`coordinate_type`,
+`img_path`,
+`desc`,
+`sone_user_id`,
+`modifier_id`
+) VALUES (
+#{name,jdbcType=VARCHAR},
+#{areaId,jdbcType=VARCHAR},
+#{address,jdbcType=VARCHAR},
+#{phone,jdbcType=VARCHAR},
+#{personToContact,jdbcType=VARCHAR},
+#{status,jdbcType=NUMERIC},
+#{averageScore,jdbcType=NUMERIC},
+#{evaluationCount,jdbcType=NUMERIC},
+#{longitude,jdbcType=NUMERIC},
+#{latitude,jdbcType=NUMERIC},
+#{coordinateType,jdbcType=NUMERIC},
+#{imagePath,jdbcType=VARCHAR},
+#{desc,jdbcType=VARCHAR},
+#{soneUserId,jdbcType=NUMERIC},
+#{modifierId,jdbcType=NUMERIC}
+)
+    </insert>
+
+    <!-- 更新店铺信息 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.Shop">
+UPDATE t_shop
+   SET `name` = #{name,jdbcType=VARCHAR},
+       `area_id` = #{areaId,jdbcType=VARCHAR},
+       `address` = #{address,jdbcType=VARCHAR},
+       `phone` = #{phone,jdbcType=VARCHAR},
+       `ptc` = #{personToContact,jdbcType=VARCHAR},
+       `status` = #{status,jdbcType=NUMERIC},
+       `average_score` = #{averageScore,jdbcType=NUMERIC},
+       `evaluation_count` = #{evaluationCount,jdbcType=NUMERIC},
+       `longitude` = #{longitude,jdbcType=NUMERIC},
+       `latitude` = #{latitude,jdbcType=NUMERIC},
+       `coordinate_type` = #{coordinateType,jdbcType=NUMERIC},
+       `img_path` = #{imagePath,jdbcType=VARCHAR},
+       `desc` = #{desc,jdbcType=VARCHAR},
+       `sone_user_id` = #{soneUserId,jdbcType=NUMERIC},
+       `modifier_id` = #{modifierId,jdbcType=NUMERIC},
+       `modify_time` = CURRENT_TIMESTAMP
+ WHERE `id` = #{id,jdbcType=NUMERIC}
+   AND `modify_time` = #{modifyTime,jdbcType=TIMESTAMP}
+    </update>
+
+    <!-- 根据ID查询店铺信息,不包含描述字段 -->
+    <select id="selectById" parameterType="decimal" resultMap="shop">
+SELECT <include refid="shopCols" />
+  FROM t_shop
+ WHERE `id` = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 根据用户ID查询用户绑定的店铺信息,不包含描述字段 -->
+    <select id="selectByUserId" parameterType="decimal" resultMap="shop">
+SELECT <include refid="shopPrefixCols">
+           <property name="tableName" value="ts" />
+           <property name="colPrefix" value="" />
+       </include>
+  FROM t_shop AS ts
+       JOIN t_user_shop AS tus ON ts.id = tus.shop_id
+ WHERE tus.`user_id` = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 根据ID查询店铺信息,包含描述字段 -->
+    <select id="selectDetailById" parameterType="decimal" resultMap="shop">
+SELECT <include refid="shopDetailCols" />
+  FROM t_shop
+ WHERE `id` = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 根据名称查询店铺信息,包含描述字段 -->
+    <select id="selectDetailByName" parameterType="string" resultMap="shop">
+SELECT <include refid="shopDetailCols" />
+  FROM t_shop
+ WHERE `name` = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 查找冲突数据数 -->
+    <select id="existsConflict" parameterType="com.ych.shcm.o2o.model.Shop" resultType="int">
+SELECT EXISTS (
+    SELECT 1
+      FROM t_shop
+     WHERE `name` = #{name,jdbcType=VARCHAR}
+       <if test="id != null">AND `id` != #{id,jdbcType=NUMERIC}</if>
+)
+    </select>
+
+    <!-- 查询列表 -->
+    <sql id="selectListCondition">
+<where>
+    <if test="areadCodes != null and areadCodes.size() > 0">
+        <choose>
+            <when test="areadCodes.size() > 1">ts.`area_id` = #{areadCodes[0],jdbcType=VARCHAR}</when>
+            <otherwise>ts.`area_id` IN (<foreach collection="areadCodes" separator="," item="areaCode">#{areaCode,jdbcType=VARCHAR}</foreach>)</otherwise>
+        </choose>
+    </if>
+    <if test="name != null and name.length() > 0">AND ts.`name` LIKE CONCAT('%', #{name,jdbcType=VARCHAR}, '%')</if>
+    <if test="minLongitude">AND ts.longitude >= #{minLongitude,jdbcType=NUMERIC}</if>
+    <if test="maxLongitude">AND ts.longitude &lt;= #{maxLongitude,jdbcType=NUMERIC}</if>
+    <if test="minLatitude">AND ts.latitude >= #{minLatitude,jdbcType=NUMERIC}</if>
+    <if test="maxLatitude">AND ts.latitude &lt;= #{maxLatitude,jdbcType=NUMERIC}</if>
+    <if test="brandId !=null ">
+        and tb.brand_id = #{brandId,jdbcType=NUMERIC}
+    </if>
+</where>
+    </sql>
+    <select id="selectList" parameterType="com.ych.shcm.o2o.parameter.QueryShopParameter" resultMap="shop">
+SELECT <include refid="shopPrefixCols">
+           <property name="tableName" value="ts" />
+           <property name="colPrefix" value="" />
+       </include>
+
+       <if test="position != null">, GetDistance(ts.longitude, ts.latitude, #{position.longitude,jdbcType=NUMERIC}, #{position.latitude,jdbcType=NUMERIC}) AS distance</if>
+        <if test="brandId !=null ">
+            ,<include refid="com.ych.shcm.o2o.dao.mybatis.ShopCarBrandMapper.carBrandPrefixCols">
+            <property name="tableName" value="tb" />
+            <property name="colPrefix" value="" />
+        </include>
+        </if>
+        FROM t_shop ts
+        <if test="brandId !=null ">
+            JOIN t_shop_car_brand tb ON  ts.id = tb.shop_id
+        </if>
+ <include refid="selectListCondition" />
+ORDER BY
+<choose>
+    <when test="sort != null and sort.length() > 0">${sort} <if test="order != null">${order}</if></when>
+    <otherwise>ts.id</otherwise>
+</choose>
+<if test="startIndex != null">LIMIT #{startIndex,jdbcType=NUMERIC}, #{pageSize,jdbcType=NUMERIC}</if>
+    </select>
+    <select id="selectList_count" parameterType="com.ych.shcm.o2o.parameter.QueryShopParameter" resultType="long">
+SELECT COUNT(1)
+  FROM t_shop ts
+        <if test="brandId !=null ">
+            JOIN t_shop_car_brand tb ON  ts.id = tb.shop_id
+        </if>
+<include refid="selectListCondition" />
+    </select>
+
+    <!-- 插入图片 -->
+    <insert id="insertImage" parameterType="com.ych.shcm.o2o.model.ShopImage" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_shop_img(
+`shop_id`,
+`img_path`,
+`sort`,
+`modifier_id`
+) VALUES (
+#{shopId,jdbcType=NUMERIC},
+#{imagePath,jdbcType=VARCHAR},
+#{sort,jdbcType=NUMERIC},
+#{modifierId,jdbcType=NUMERIC}
+)
+    </insert>
+
+    <!-- 根据ID删除图片 -->
+    <delete id="deleteImageById" parameterType="collection">
+DELETE FROM t_shop_img
+WHERE <choose>
+          <when test="collection.size() == 1">`id` = #{collection[0],jdbcType=NUMERIC}</when>
+          <otherwise>`id` IN (<foreach collection="collection" item="id" separator=",">#{id,jdbcType=NUMERIC}</foreach></otherwise>
+      </choose>
+    </delete>
+
+    <!-- 更新图片信息 -->
+    <update id="updateImage" parameterType="com.ych.shcm.o2o.model.ShopImage">
+UPDATE t_shop_img
+   SET `shop_id` = #{shopId,jdbcType=NUMERIC},
+       `img_path` = #{imagePath,jdbcType=VARCHAR},
+       `sort` = #{sort,jdbcType=NUMERIC},
+       `modifier_id` = #{modifierId,jdbcType=NUMERIC},
+       `modify_time` = CURRENT_TIMESTAMP
+ WHERE `id` = #{id,jdbcType=NUMERIC}
+   AND `modify_time` = #{modifyTime,jdbcType=TIMESTAMP}
+    </update>
+
+    <!-- 根据店铺ID查询图片列表 -->
+    <select id="selectImageByShopId" parameterType="decimal" resultMap="shopImage">
+SELECT <include refid="shopImageCols" />
+  FROM t_shop_img
+ WHERE shop_id = #{value,jdbcType=NUMERIC}
+ORDER BY `sort`
+    </select>
+
+    <!-- 查询是否存在图片的冲突数据 -->
+    <select id="existsConflictImage" parameterType="com.ych.shcm.o2o.model.ShopImage" resultType="int">
+SELECT EXISTS (
+SELECT 1
+  FROM t_shop_img
+ WHERE `shop_id` = #{shopId,jdbcType=NUMERIC}
+   AND `sort` = #{sort,jdbcType=NUMERIC}
+   <if test="id != null">AND `id` != #{id,jdbcType=NUMERIC}</if>
+)
+    </select>
+
+</mapper>

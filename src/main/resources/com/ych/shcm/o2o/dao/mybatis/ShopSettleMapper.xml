@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.ShopSettleMapper">
+
+    <!-- 门店结算明细 -->
+    <resultMap id="settleDetail" type="com.ych.shcm.o2o.model.ShopSettleDetail">
+        <id column="id" property="id" jdbcType="NUMERIC"/>
+        <result column="order_id" property="orderId" jdbcType="NUMERIC"/>
+        <result column="pay_order_id" property="payOrderId" jdbcType="NUMERIC"/>
+        <result column="order_price" property="orderPrice" jdbcType="NUMERIC"/>
+        <result column="channel_fee" property="channelFee" jdbcType="NUMERIC"/>
+        <result column="shop_incomes" property="shopIncomes" jdbcType="NUMERIC"/>
+        <result column="shop_channel_fee" property="shopChannelFee" jdbcType="NUMERIC"/>
+        <result column="service_provider_incomes" property="serviceProviderIncomes" jdbcType="NUMERIC"/>
+        <result column="service_provider_channel_fee" property="serviceProviderChannelFee" jdbcType="NUMERIC"/>
+        <result column="platform_incomes" property="platformIncomes" jdbcType="NUMERIC"/>
+        <result column="platform_channel_fee" property="platformChannelFee" jdbcType="NUMERIC"/>
+        <result column="settle_date" property="settleDate" jdbcType="DATE"/>
+        <result column="shop_id" property="shopId" jdbcType="NUMERIC"/>
+        <result column="service_provider_id" property="serviceProviderId" jdbcType="NUMERIC"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <association property="order" resultMap="com.ych.shcm.o2o.dao.mybatis.OrderMapper.order" columnPrefix="to_"/>
+        <association property="payOrder" resultMap="com.ych.shcm.o2o.dao.mybatis.PayOrderMapper.payOrder"
+                     columnPrefix="tpo_"/>
+        <association property="serviceProvider"
+                     resultMap="com.ych.shcm.o2o.dao.mybatis.ServiceProviderMapper.serviceProvider"
+                     columnPrefix="tsp_"/>
+    </resultMap>
+
+    <!-- 门店日结算数据 -->
+    <resultMap id="settleDate" type="com.ych.shcm.o2o.model.ShopSettleDate">
+        <id column="id" property="id" jdbcType="NUMERIC"/>
+        <result column="shop_id" property="shopId" jdbcType="NUMERIC"/>
+        <result column="settle_date" property="settleDate" jdbcType="DATE"/>
+        <result column="order_price" property="orderPrice" jdbcType="NUMERIC"/>
+        <result column="channel_fee" property="channelFee" jdbcType="NUMERIC"/>
+        <result column="shop_incomes" property="shopIncomes" jdbcType="NUMERIC"/>
+        <result column="shop_channel_fee" property="shopChannelFee" jdbcType="NUMERIC"/>
+        <result column="service_provider_incomes" property="serviceProviderIncomes" jdbcType="NUMERIC"/>
+        <result column="service_provider_channel_fee" property="serviceProviderChannelFee" jdbcType="NUMERIC"/>
+        <result column="platform_incomes" property="platformIncomes" jdbcType="NUMERIC"/>
+        <result column="platform_channel_fee" property="platformChannelFee" jdbcType="NUMERIC"/>
+        <result column="service_provider_id" property="serviceProviderId" jdbcType="NUMERIC"/>
+        <result column="status" property="status" jdbcType="NUMERIC"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="modifier_id" property="modifierId" jdbcType="NUMERIC"/>
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP"/>
+        <association property="shop" resultMap="com.ych.shcm.o2o.dao.mybatis.ShopMapper.shop" columnPrefix="ts_"/>
+        <association property="serviceProvider"
+                     resultMap="com.ych.shcm.o2o.dao.mybatis.ServiceProviderMapper.serviceProvider"
+                     columnPrefix="tsp_"/>
+    </resultMap>
+
+    <!-- 门店日结算汇总数据 -->
+    <resultMap id="dateSummary" type="com.ych.shcm.o2o.model.ShopSettleDateSummary">
+        <id column="id" property="id" jdbcType="NUMERIC"/>
+        <result column="settle_date" property="settleDate" jdbcType="DATE"/>
+        <result column="order_price" property="orderPrice" jdbcType="NUMERIC"/>
+        <result column="channel_fee" property="channelFee" jdbcType="NUMERIC"/>
+        <result column="shop_incomes" property="shopIncomes" jdbcType="NUMERIC"/>
+        <result column="shop_channel_fee" property="shopChannelFee" jdbcType="NUMERIC"/>
+        <result column="service_provider_incomes" property="serviceProviderIncomes" jdbcType="NUMERIC"/>
+        <result column="service_provider_channel_fee" property="serviceProviderChannelFee" jdbcType="NUMERIC"/>
+        <result column="platform_incomes" property="platformIncomes" jdbcType="NUMERIC"/>
+        <result column="platform_channel_fee" property="platformChannelFee" jdbcType="NUMERIC"/>
+        <result column="status" property="status" jdbcType="NUMERIC"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="modifier_id" property="modifierId" jdbcType="NUMERIC"/>
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <!-- 详情列 -->
+    <sql id="detailCols">
+`id`,
+`order_id`,
+`pay_order_id`,
+`order_price`,
+`channel_fee`,
+`shop_incomes`,
+`shop_channel_fee`,
+`service_provider_incomes`,
+`service_provider_channel_fee`,
+`platform_incomes`,
+`platform_channel_fee`,
+`settle_date`,
+`shop_id`,
+`service_provider_id`,
+`create_time`
+    </sql>
+    <sql id="detailPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`order_id` AS `${colPrefix}order_id`,
+`${tableName}`.`pay_order_id` AS `${colPrefix}pay_order_id`,
+`${tableName}`.`order_price` AS `${colPrefix}order_price`,
+`${tableName}`.`channel_fee` AS `${colPrefix}channel_fee`,
+`${tableName}`.`shop_incomes` AS `${colPrefix}shop_incomes`,
+`${tableName}`.`shop_channel_fee` AS `${colPrefix}shop_channel_fee`,
+`${tableName}`.`service_provider_incomes` AS `${colPrefix}service_provider_incomes`,
+`${tableName}`.`service_provider_channel_fee` AS `${colPrefix}service_provider_channel_fee`,
+`${tableName}`.`platform_incomes` AS `${colPrefix}platform_incomes`,
+`${tableName}`.`platform_channel_fee` AS `${colPrefix}platform_channel_fee`,
+`${tableName}`.`settle_date` AS `${colPrefix}settle_date`,
+`${tableName}`.`shop_id` AS `${colPrefix}shop_id`,
+`${tableName}`.`service_provider_id` AS `${colPrefix}service_provider_id`,
+`${tableName}`.`create_time` AS `${colPrefix}create_time`
+    </sql>
+
+    <!-- 日结算数据列 -->
+    <sql id="dateCols">
+`id`,
+`shop_id`,
+`settle_date`,
+`order_price`,
+`channel_fee`,
+`shop_incomes`,
+`shop_channel_fee`,
+`service_provider_incomes`,
+`service_provider_channel_fee`,
+`platform_incomes`,
+`platform_channel_fee`,
+`service_provider_id`,
+`status`,
+`create_time`,
+`modifier_id`,
+`modify_time`
+    </sql>
+    <sql id="datePrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`shop_id` AS `${colPrefix}shop_id`,
+`${tableName}`.`settle_date` AS `${colPrefix}settle_date`,
+`${tableName}`.`order_price` AS `${colPrefix}order_price`,
+`${tableName}`.`channel_fee` AS `${colPrefix}channel_fee`,
+`${tableName}`.`shop_incomes` AS `${colPrefix}shop_incomes`,
+`${tableName}`.`shop_channel_fee` AS `${colPrefix}shop_channel_fee`,
+`${tableName}`.`service_provider_incomes` AS `${colPrefix}service_provider_incomes`,
+`${tableName}`.`service_provider_channel_fee` AS `${colPrefix}service_provider_channel_fee`,
+`${tableName}`.`platform_incomes` AS `${colPrefix}platform_incomes`,
+`${tableName}`.`platform_channel_fee` AS `${colPrefix}platform_channel_fee`,
+`${tableName}`.`service_provider_id` AS `${colPrefix}service_provider_id`,
+`${tableName}`.`status` AS `${colPrefix}status`,
+`${tableName}`.`create_time` AS `${colPrefix}create_time`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+    </sql>
+
+    <!-- 日汇总数据列 -->
+    <sql id="dateSummaryCols">
+`id`,
+`settle_date`,
+`order_price`,
+`channel_fee`,
+`shop_incomes`,
+`shop_channel_fee`,
+`service_provider_incomes`,
+`service_provider_channel_fee`,
+`platform_incomes`,
+`platform_channel_fee`,
+`status`,
+`create_time`,
+`modifier_id`,
+`modify_time`
+    </sql>
+    <sql id="dateSummaryPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`settle_date` AS `${colPrefix}settle_date`,
+`${tableName}`.`order_price` AS `${colPrefix}order_price`,
+`${tableName}`.`channel_fee` AS `${colPrefix}channel_fee`,
+`${tableName}`.`shop_incomes` AS `${colPrefix}shop_incomes`,
+`${tableName}`.`shop_channel_fee` AS `${colPrefix}shop_channel_fee`,
+`${tableName}`.`service_provider_incomes` AS `${colPrefix}service_provider_incomes`,
+`${tableName}`.`service_provider_channel_fee` AS `${colPrefix}service_provider_channel_fee`,
+`${tableName}`.`platform_incomes` AS `${colPrefix}platform_incomes`,
+`${tableName}`.`platform_channel_fee` AS `${colPrefix}platform_channel_fee`,
+`${tableName}`.`status` AS `${colPrefix}status`,
+`${tableName}`.`create_time` AS `${colPrefix}create_time`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+    </sql>
+
+    <!-- 插入店铺结算明细 -->
+    <insert id="insertDetail" parameterType="com.ych.shcm.o2o.model.ShopSettleDetail" useGeneratedKeys="true"
+            keyProperty="id">
+INSERT INTO t_shop_settle_detail(
+`order_id`,
+`pay_order_id`,
+`order_price`,
+`channel_fee`,
+`shop_incomes`,
+`shop_channel_fee`,
+`service_provider_incomes`,
+`service_provider_channel_fee`,
+`platform_incomes`,
+`platform_channel_fee`,
+`settle_date`,
+`shop_id`,
+`service_provider_id`
+) VALUES (
+#{orderId,jdbcType=NUMERIC},
+#{payOrderId,jdbcType=NUMERIC},
+#{orderPrice,jdbcType=NUMERIC},
+#{channelFee,jdbcType=NUMERIC},
+#{shopIncomes,jdbcType=NUMERIC},
+#{shopChannelFee,jdbcType=NUMERIC},
+#{serviceProviderIncomes,jdbcType=NUMERIC},
+#{serviceProviderChannelFee,jdbcType=NUMERIC},
+#{platformIncomes,jdbcType=NUMERIC},
+#{platformChannelFee,jdbcType=NUMERIC},
+#{settleDate,jdbcType=DATE},
+#{shopId,jdbcType=NUMERIC},
+#{serviceProviderId,jdbcType=NUMERIC}
+)
+    </insert>
+
+    <!-- 查询门店结算明细列表 -->
+    <sql id="selectDetailListCondition">
+        <where>
+            <if test="shopId != null">tssd.shop_id = #{shopId,jdbcType=NUMERIC}</if>
+            <if test="settleDate != null">AND tssd.settle_date = #{settleDate,jdbcType=DATE}</if>
+            <if test="settleDateBegin != null">AND tssd.settle_date >= #{settleDateBegin,jdbcType=DATE}</if>
+            <if test="settleDateEnd != null">AND tssd.settle_date &lt;= #{settleDateEnd,jdbcType=DATE}</if>
+            <if test="serviceProviderId != null">AND tssd.service_provider_id = #{serviceProviderId,jdbcType=NUMERIC}
+            </if>
+        </where>
+    </sql>
+    <select id="selectDetailList" parameterType="com.ych.shcm.o2o.parameter.QueryShopSettleParameter"
+            resultMap="settleDetail">
+        SELECT
+        <include refid="detailPrefixCols">
+            <property name="tableName" value="tssd"/>
+            <property name="colPrefix" value=""/>
+        </include>
+        ,
+        <include refid="com.ych.shcm.o2o.dao.mybatis.OrderMapper.orderPrefixCols">
+            <property name="tableName" value="to"/>
+            <property name="colPrefix" value="to_"/>
+        </include>
+        ,
+        <include refid="com.ych.shcm.o2o.dao.mybatis.PayOrderMapper.payOrderPrefixCols">
+            <property name="tableName" value="tpo"/>
+            <property name="colPrefix" value="tpo_"/>
+        </include>
+        ,
+        <include refid="com.ych.shcm.o2o.dao.mybatis.ServiceProviderMapper.serviceProviderPrefixCols">
+            <property name="tableName" value="tsp"/>
+            <property name="colPrefix" value="tsp_"/>
+        </include>
+        FROM t_shop_settle_detail AS tssd
+        JOIN t_order AS `to` ON tssd.order_id = `to`.id
+        JOIN t_pay_order AS tpo ON tssd.pay_order_id = tpo.id
+        JOIN t_service_provider AS tsp ON tssd.service_provider_id = tsp.id
+        <include refid="selectDetailListCondition"/>
+        ORDER BY tssd.create_time DESC, tssd.id DESC
+        <if test="startIndex != null">LIMIT #{startIndex,jdbcType=NUMERIC}, #{pageSize,jdbcType=NUMERIC}</if>
+    </select>
+    <select id="selectDetailList_count" parameterType="com.ych.shcm.o2o.parameter.QueryShopSettleParameter"
+            resultType="long">
+        SELECT COUNT(1)
+        FROM t_shop_settle_detail AS tssd
+        <include refid="selectDetailListCondition"/>
+    </select>
+
+    <!-- 插入日结算信息 -->
+    <insert id="insertDate" parameterType="com.ych.shcm.o2o.model.ShopSettleDate" useGeneratedKeys="true"
+            keyProperty="id">
+INSERT INTO t_shop_settle_date(
+`shop_id`,
+`settle_date`,
+`order_price`,
+`channel_fee`,
+`shop_incomes`,
+`shop_channel_fee`,
+`service_provider_incomes`,
+`service_provider_channel_fee`,
+`platform_incomes`,
+`platform_channel_fee`,
+`service_provider_id`,
+`status`
+) VALUES (
+#{shopId,jdbcType=NUMERIC},
+#{settleDate,jdbcType=DATE},
+#{orderPrice,jdbcType=NUMERIC},
+#{channelFee,jdbcType=NUMERIC},
+#{shopIncomes,jdbcType=NUMERIC},
+#{shopChannelFee,jdbcType=NUMERIC},
+#{serviceProviderIncomes,jdbcType=NUMERIC},
+#{serviceProviderChannelFee,jdbcType=NUMERIC},
+#{platformIncomes,jdbcType=NUMERIC},
+#{platformChannelFee,jdbcType=NUMERIC},
+#{serviceProviderId,jdbcType=NUMERIC},
+#{status,jdbcType=NUMERIC}
+) ON DUPLICATE KEY UPDATE
+order_price = order_price + VALUES(order_price),
+channel_fee = channel_fee + VALUES(channel_fee),
+shop_incomes = shop_incomes + VALUES(shop_incomes),
+shop_channel_fee = shop_channel_fee + VALUES(shop_channel_fee),
+service_provider_incomes = service_provider_incomes + VALUES(service_provider_incomes),
+service_provider_channel_fee = service_provider_channel_fee + VALUES(service_provider_channel_fee),
+platform_incomes = platform_incomes + VALUES(platform_incomes),
+platform_channel_fee = platform_channel_fee + VALUES(platform_channel_fee)
+    </insert>
+
+    <!-- 更新日结算信息状态 -->
+    <update id="updateDateStatus" parameterType="com.ych.shcm.o2o.model.ShopSettleDate">
+        UPDATE t_shop_settle_date
+        SET `status` = #{status,jdbcType=NUMERIC},
+        `modifier_id` = #{modifierId,jdbcType=NUMERIC},
+        `modify_time` = CURRENT_TIMESTAMP
+        WHERE
+        <if test="id != null">`id` = #{id,jdbcType=NUMERIC}</if>
+        <if test="id == null">`settle_date` = #{settleDate,jdbcType=DATE}</if>
+    </update>
+
+    <!-- 增加日结算数据的金额 -->
+    <update id="addDateMoney" parameterType="com.ych.shcm.o2o.model.ShopSettleDate">
+UPDATE t_shop_settle_date
+   SET `order_price` = `order_price` + #{orderPrice,jdbcType=NUMERIC},
+       `channel_fee` = `channel_fee` + #{channelFee,jdbcType=NUMERIC},
+       `shop_incomes` = `shop_incomes` + #{shopIncomes,jdbcType=NUMERIC},
+       `shop_channel_fee` = `shop_channel_fee` + #{shopChannelFee,jdbcType=NUMERIC},
+       `service_provider_incomes` = `service_provider_incomes` + #{serviceProviderIncomes,jdbcType=NUMERIC},
+       `service_provider_channel_fee` = `service_provider_channel_fee` + #{serviceProviderChannelFee,jdbcType=NUMERIC},
+       `platform_incomes` = `platform_incomes` + #{platformIncomes,jdbcType=NUMERIC},
+       `platform_channel_fee` = `platform_channel_fee` + #{platformChannelFee,jdbcType=NUMERIC},
+ WHERE `id` = #{id,jdbcType=NUMERIC}
+    </update>
+
+    <!-- 查询日结算数据 -->
+    <select id="selectDate" parameterType="map" resultMap="settleDate">
+        SELECT
+        <include refid="dateCols"/>
+        FROM t_shop_settle_date
+        <where>
+            <if test="id != null">id = #{id,jdbcType=NUMERIC}</if>
+            <if test="shopId != null">AND shop_id = #{shopId,jdbcType=NUMERIC}</if>
+            <if test="settleDate != null">AND settle_date = #{settleDate,jdbcType=TIMESTAMP}</if>
+        </where>
+    </select>
+
+    <!-- 查询日结算数据列表 -->
+    <sql id="selectDateListCondition">
+        <where>
+            <if test="shopId != null">tssd.shop_id = #{shopId,jdbcType=NUMERIC}</if>
+            <if test="settleDate != null">AND tssd.settle_date = #{settleDate,jdbcType=DATE}</if>
+            <if test="settleDateBegin != null">AND tssd.settle_date >= #{settleDateBegin,jdbcType=DATE}</if>
+            <if test="settleDateEnd != null">AND tssd.settle_date &lt;= #{settleDateEnd,jdbcType=DATE}</if>
+            <if test="serviceProviderId != null">AND tssd.service_provider_id = #{serviceProviderId,jdbcType=NUMERIC}
+            </if>
+            <if test="statuses != null and statuses.size() > 0">
+                <choose>
+                    <when test="statuses.size() == 1">AND tssd.status = #{statuses[0],jdbcType=NUMERIC}</when>
+                    <otherwise>AND tssd.status IN (<foreach collection="statuses" separator="," item="status">
+                        #{status,jdbcType=NUMERIC}</foreach>)
+                    </otherwise>
+                </choose>
+            </if>
+        </where>
+    </sql>
+    <select id="selectDateList" parameterType="com.ych.shcm.o2o.parameter.QueryShopSettleParameter"
+            resultMap="settleDate">
+        SELECT
+        <include refid="datePrefixCols">
+            <property name="tableName" value="tssd"/>
+            <property name="colPrefix" value=""/>
+        </include>
+        ,
+        <include refid="com.ych.shcm.o2o.dao.mybatis.ShopMapper.shopPrefixCols">
+            <property name="tableName" value="ts"/>
+            <property name="colPrefix" value="ts_"/>
+        </include>
+        ,
+        <include refid="com.ych.shcm.o2o.dao.mybatis.ServiceProviderMapper.serviceProviderPrefixCols">
+            <property name="tableName" value="tsp"/>
+            <property name="colPrefix" value="tsp_"/>
+        </include>
+        FROM t_shop_settle_date AS tssd
+        JOIN t_shop AS ts ON tssd.shop_id = ts.id
+        JOIN t_service_provider AS tsp ON tssd.service_provider_id = tsp.id
+        <include refid="selectDateListCondition"/>
+        ORDER BY tssd.create_time DESC, tssd.id DESC
+        <if test="startIndex != null">LIMIT #{startIndex,jdbcType=NUMERIC}, #{pageSize,jdbcType=NUMERIC}</if>
+    </select>
+    <select id="selectDateList_count" parameterType="com.ych.shcm.o2o.parameter.QueryShopSettleParameter"
+            resultType="long">
+        SELECT COUNT(1)
+        FROM t_shop_settle_date AS tssd
+        <include refid="selectDateListCondition"/>
+    </select>
+
+    <!-- 插入结算日数据汇总 -->
+    <insert id="insertSummary" parameterType="com.ych.shcm.o2o.model.ShopSettleDateSummary" useGeneratedKeys="true"
+            keyProperty="id">
+INSERT INTO t_shop_settle_date_summary(
+`settle_date`,
+`order_price`,
+`channel_fee`,
+`shop_incomes`,
+`shop_channel_fee`,
+`service_provider_incomes`,
+`service_provider_channel_fee`,
+`platform_incomes`,
+`platform_channel_fee`,
+`status`
+) VALUES (
+#{settleDate,jdbcType=DATE},
+#{orderPrice,jdbcType=NUMERIC},
+#{channelFee,jdbcType=NUMERIC},
+#{shopIncomes,jdbcType=NUMERIC},
+#{shopChannelFee,jdbcType=NUMERIC},
+#{serviceProviderIncomes,jdbcType=NUMERIC},
+#{serviceProviderChannelFee,jdbcType=NUMERIC},
+#{platformIncomes,jdbcType=NUMERIC},
+#{platformChannelFee,jdbcType=NUMERIC},
+#{status,jdbcType=NUMERIC}
+) ON DUPLICATE KEY UPDATE
+order_price = order_price + VALUES(order_price),
+channel_fee = channel_fee + VALUES(channel_fee),
+shop_incomes = shop_incomes + VALUES(shop_incomes),
+shop_channel_fee = shop_channel_fee + VALUES(shop_channel_fee),
+service_provider_incomes = service_provider_incomes + VALUES(service_provider_incomes),
+service_provider_channel_fee = service_provider_channel_fee + VALUES(service_provider_channel_fee),
+platform_incomes = platform_incomes + VALUES(platform_incomes),
+platform_channel_fee = platform_channel_fee + VALUES(platform_channel_fee)
+    </insert>
+
+    <!-- 更新日结算信息状态 -->
+    <update id="updateSummaryStatus" parameterType="com.ych.shcm.o2o.model.ShopSettleDateSummary">
+UPDATE t_shop_settle_date_summary
+   SET `status` = #{status,jdbcType=NUMERIC},
+       `modifier_id` = #{modifierId,jdbcType=NUMERIC},
+       `modify_time` = CURRENT_TIMESTAMP
+ WHERE `id` = #{id,jdbcType=NUMERIC}
+    </update>
+
+    <!-- 增加日结算数据的金额 -->
+    <update id="addSummaryMoney" parameterType="com.ych.shcm.o2o.model.ShopSettleDateSummary">
+UPDATE t_shop_settle_date_summary
+   SET `order_price` = `order_price` + #{orderPrice,jdbcType=NUMERIC},
+       `channel_fee` = `channel_fee` + #{channelFee,jdbcType=NUMERIC},
+       `shop_incomes` = `shop_incomes` + #{shopIncomes,jdbcType=NUMERIC},
+       `shop_channel_fee` = `shop_channel_fee` + #{shopChannelFee,jdbcType=NUMERIC},
+       `service_provider_incomes` = `service_provider_incomes` + #{serviceProviderIncomes,jdbcType=NUMERIC},
+       `service_provider_channel_fee` = `service_provider_channel_fee` + #{serviceProviderChannelFee,jdbcType=NUMERIC},
+       `platform_incomes` = `platform_incomes` + #{platformIncomes,jdbcType=NUMERIC},
+       `platform_channel_fee` = `platform_channel_fee` + #{platformChannelFee,jdbcType=NUMERIC},
+ WHERE `id` = #{id,jdbcType=NUMERIC}
+    </update>
+
+    <!-- 查询日结算数据 -->
+    <select id="selectSummary" parameterType="map" resultMap="dateSummary">
+        SELECT
+        <include refid="dateSummaryCols"/>
+        FROM t_shop_settle_date_summary
+        <where>
+            <if test="id != null">id = #{id,jdbcType=NUMERIC}</if>
+            <if test="settleDate != null">AND settle_date = #{settleDate,jdbcType=TIMESTAMP}</if>
+        </where>
+    </select>
+
+    <!-- 查询日结算数据列表 -->
+    <sql id="selectSummaryListCondition">
+        <where>
+            <if test="settleDate != null">AND tssds.settle_date = #{settleDate,jdbcType=DATE}</if>
+            <if test="settleDateBegin != null">AND tssds.settle_date >= #{settleDateBegin,jdbcType=DATE}</if>
+            <if test="settleDateEnd != null">AND tssds.settle_date &lt;= #{settleDateEnd,jdbcType=DATE}</if>
+            <if test="statuses != null and statuses.size() > 0">
+                <choose>
+                    <when test="statuses.size() == 1">AND tssds.status = #{statuses[0],jdbcType=NUMERIC}</when>
+                    <otherwise>AND tssds.status IN (<foreach collection="statuses" separator="," item="status">
+                        #{status,jdbcType=NUMERIC}</foreach>)
+                    </otherwise>
+                </choose>
+            </if>
+        </where>
+    </sql>
+    <select id="selectSummaryList" parameterType="com.ych.shcm.o2o.parameter.QueryShopSettleParameter"
+            resultMap="dateSummary">
+        SELECT
+        <include refid="dateSummaryPrefixCols">
+            <property name="tableName" value="tssds"/>
+            <property name="colPrefix" value=""/>
+        </include>
+        FROM t_shop_settle_date_summary AS tssds
+        <include refid="selectSummaryListCondition"/>
+        ORDER BY tssds.create_time DESC, tssds.id DESC
+        <if test="startIndex != null">LIMIT #{startIndex,jdbcType=NUMERIC}, #{pageSize,jdbcType=NUMERIC}</if>
+    </select>
+    <select id="selectSummaryList_count" parameterType="com.ych.shcm.o2o.parameter.QueryShopSettleParameter"
+            resultType="long">
+        SELECT COUNT(1)
+        FROM t_shop_settle_date_summary AS tssds
+        <include refid="selectSummaryListCondition"/>
+    </select>
+
+
+    <select id="checkDateIfSettledAll" parameterType="date" resultType="long">
+
+        SELECT count(1) FROM t_shop_settle_date WHERE settle_date =  #{value,jdbcType=TIMESTAMP} AND status = 0
+    </select>
+
+</mapper>

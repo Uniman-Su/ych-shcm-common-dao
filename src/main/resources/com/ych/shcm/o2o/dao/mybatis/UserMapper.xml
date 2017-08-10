@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.UserMapper">
+
+    <!-- 用户 -->
+    <resultMap id="user" type="com.ych.shcm.o2o.model.User">
+        <id column="id" property="id" jdbcType="NUMERIC" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="nick_name" property="nickName" jdbcType="VARCHAR" />
+        <result column="phone" property="phone" jdbcType="VARCHAR" />
+        <result column="user_name" property="userName" jdbcType="VARCHAR" />
+        <result column="password" property="password" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="modifier_id" property="modifierId" jdbcType="NUMERIC" />
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <!-- 用户访问渠道 -->
+    <resultMap id="accessChannel" type="com.ych.shcm.o2o.model.UserAccessChannel">
+        <id column="id" property="id" jdbcType="NUMERIC" />
+        <result column="user_id" property="userId" jdbcType="NUMERIC" />
+        <result column="access_channel_id" property="accessChannelId" jdbcType="NUMERIC" />
+        <result column="user_id_of_access_channel" property="userIdOfAccessChannel" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <!-- 用户的列 -->
+    <sql id="userCols">
+`id`,
+`name`,
+`nick_name`,
+`phone`,
+`user_name`,
+`password`,
+`create_time`,
+`modifier_id`,
+`modify_time`
+    </sql>
+    <sql id="userPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`name` AS `${colPrefix}name`,
+`${tableName}`.`nick_name` AS `${colPrefix}nick_name`,
+`${tableName}`.`phone` AS `${colPrefix}phone`,
+`${tableName}`.`user_name` AS `${colPrefix}user_name`,
+`${tableName}`.`password` AS `${colPrefix}password`,
+`${tableName}`.`create_time` AS `${colPrefix}create_time`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+    </sql>
+
+    <!-- 用户访问渠道的列 -->
+    <sql id="accessChannelCols">
+`id`,
+`user_id`,
+`access_channel_id`,
+`user_id_of_access_channel`,
+`create_time`
+    </sql>
+    <sql id="accessChannelPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`user_id` AS `${colPrefix}user_id`,
+`${tableName}`.`access_channel_id` AS `${colPrefix}access_channel_id`,
+`${tableName}`.`user_id_of_access_channel` AS `${colPrefix}user_id_of_access_channel`,
+`${tableName}`.`create_time` AS `${colPrefix}create_time`
+    </sql>
+
+    <!-- 插入用户数据 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.User" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_user (
+`name`,
+`nick_name`,
+`phone`,
+`user_name`,
+`password`,
+`modifier_id`
+) VALUES (
+#{name,jdbcType=VARCHAR},
+#{nickName,jdbcType=VARCHAR},
+#{phone,jdbcType=VARCHAR},
+#{userName,jdbcType=VARCHAR},
+#{password,jdbcType=VARCHAR},
+#{modifierId,jdbcType=NUMERIC}
+)
+    </insert>
+
+    <!-- 更新用户数据 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.User">
+UPDATE t_user
+   SET `name` = #{name,jdbcType=VARCHAR},
+       `nick_name` = #{nickName,jdbcType=VARCHAR},
+       `phone` = #{phone,jdbcType=VARCHAR},
+       `user_name` = #{userName,jdbcType=VARCHAR},
+       `password` = #{password,jdbcType=VARCHAR},
+       `modifier_id` = #{modifierId,jdbcType=NUMERIC},
+       `modify_time` = CURRENT_TIMESTAMP
+ WHERE `id` = #{id,jdbcType=NUMERIC}
+   AND `modify_time` = #{modifyTime,jdbcType=TIMESTAMP}
+    </update>
+
+    <!-- 查询是否存在冲突数据,现在来说就是指电话号码 -->
+    <select id="existsConflict" parameterType="com.ych.shcm.o2o.model.User" resultType="int">
+SELECT EXISTS (
+SELECT 1
+  FROM t_user
+ WHERE `phone` = #{phone,jdbcType=VARCHAR}
+   <if test="id != null">AND `id` != #{id,jdbcType=NUMERIC}</if>
+)
+    </select>
+
+    <!-- 根据ID获取用户信息 -->
+    <select id="selectById" parameterType="decimal" resultMap="user">
+SELECT <include refid="userCols" />
+  FROM t_user
+ WHERE `id` = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 根据电话号码获取用户信息 -->
+    <select id="selectByPhone" parameterType="string" resultMap="user">
+SELECT <include refid="userCols" />
+  FROM t_user
+ WHERE `phone` = #{value,jdbcType=VARCHAR}
+    </select>
+
+    <!-- 根据电话号码获取用户信息 -->
+    <select id="selectByUserName" parameterType="string" resultMap="user">
+SELECT <include refid="userCols" />
+  FROM t_user
+ WHERE `user_name` = #{value,jdbcType=VARCHAR}
+    </select>
+
+    <!-- 插入用户的访问渠道信息 -->
+    <insert id="insertAccessChannel" parameterType="com.ych.shcm.o2o.model.UserAccessChannel" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_user_access_channel (
+`user_id`,
+`access_channel_id`,
+`user_id_of_access_channel`
+) VALUES (
+#{userId,jdbcType=NUMERIC},
+#{accessChannelId,jdbcType=NUMERIC},
+#{userIdOfAccessChannel,jdbcType=VARCHAR}
+)
+    </insert>
+
+    <!-- 更新用户的访问渠道信息 -->
+    <update id="updateAccessChannel" parameterType="com.ych.shcm.o2o.model.UserAccessChannel">
+UPDATE t_user_access_channel
+   SET `user_id` = #{userId,jdbcType=NUMERIC},
+       `access_channel_id` = #{accessChannelId,jdbcType=NUMERIC},
+       `user_id_of_access_channel` = #{userIdOfAccessChannel,jdbcType=VARCHAR}
+ WHERE `id` = #{id,jdbcType=NUMERIC}
+    </update>
+
+    <!-- 查询渠道信息 -->
+    <select id="selectAccessChannel" parameterType="map" resultMap="accessChannel">
+SELECT <include refid="accessChannelCols" />
+  FROM t_user_access_channel
+<where>
+    <if test="userId != null">`user_id` = #{userId,jdbcType=NUMERIC}</if>
+    <if test="accessChannelId != null">AND `access_channel_id` = #{accessChannelId,jdbcType=NUMERIC}</if>
+    <if test="userIdOfAccessChannel != null">AND `user_id_of_access_channel` = #{userIdOfAccessChannel,jdbcType=VARCHAR}</if>
+</where>
+    </select>
+
+</mapper>

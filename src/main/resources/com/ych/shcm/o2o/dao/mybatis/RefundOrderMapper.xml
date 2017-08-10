@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.RefundOrderMapper">
+
+    <!-- 插入退款单 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.RefundOrder" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_refund_order (
+order_id,
+flow_no,
+pay_channel,
+pay_channel_flow_no,
+refund_money,
+status,
+refund_time,
+fail_time
+) VALUES (
+#{orderId,jdbcType=NUMERIC},
+#{flowNo,jdbcType=VARCHAR},
+#{payChannel,jdbcType=NUMERIC},
+#{payChannelFlowNo,jdbcType=VARCHAR},
+#{refundMoney,jdbcType=NUMERIC},
+#{status,jdbcType=NUMERIC},
+#{refundTime,jdbcType=TIMESTAMP},
+#{failTime,jdbcType=TIMESTAMP}
+)
+    </insert>
+
+    <!-- 更新 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.RefundOrder">
+UPDATE t_refund_order
+   SET status = #{status,jdbcType=NUMERIC},
+       refund_time = #{refundTime,jdbcType=TIMESTAMP},
+       fail_time = #{failTime,jdbcType=TIMESTAMP}
+ WHERE id = #{id,jdbcType=NUMERIC}
+    </update>
+
+</mapper>

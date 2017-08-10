@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.OrderEvaluationMapper">
+
+    <!-- 订单评价 -->
+    <resultMap id="orderEvaluation" type="com.ych.shcm.o2o.model.OrderEvaluation">
+        <id column="id" property="id" jdbcType="NUMERIC"/>
+        <result column="order_id" property="orderId" jdbcType="NUMERIC"/>
+        <result column="attitude" property="attitude" jdbcType="NUMERIC"/>
+        <result column="skill" property="skill" jdbcType="NUMERIC"/>
+        <result column="environment" property="environment" jdbcType="NUMERIC"/>
+        <result column="efficiency" property="efficiency" jdbcType="NUMERIC"/>
+        <result column="average" property="average" jdbcType="NUMERIC"/>
+        <result column="overall_evaluation" property="overallEvaluation" jdbcType="NUMERIC"/>
+        <result column="content" property="content" jdbcType="VARCHAR"/>
+        <result column="evaluate_time" property="evaluateTime" jdbcType="TIMESTAMP"/>
+        <association property="order" resultMap="com.ych.shcm.o2o.dao.mybatis.OrderMapper.order"
+                     columnPrefix="to_"/>
+    </resultMap>
+
+
+    <!-- 订单评价的列 -->
+    <sql id="orderEvaluationCols">
+`id`,
+`order_id`,
+`attitude`,
+`skill`,
+`environment`,
+`efficiency`,
+`average`,
+`overall_evaluation`,
+`content`,
+`evaluate_time`
+    </sql>
+    <sql id="orderEvaluationPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`order_id` AS `${colPrefix}order_id`,
+`${tableName}`.`attitude` AS `${colPrefix}attitude`,
+`${tableName}`.`skill` AS `${colPrefix}skill`,
+`${tableName}`.`environment` AS `${colPrefix}environment`,
+`${tableName}`.`efficiency` AS `${colPrefix}efficiency`,
+`${tableName}`.`average` AS `${colPrefix}average`,
+`${tableName}`.`overall_evaluation` AS `${colPrefix}overall_evaluation`,
+`${tableName}`.`content` AS `${colPrefix}content`,
+`${tableName}`.`evaluate_time` AS `${colPrefix}evaluate_time`
+    </sql>
+
+    <!-- 查询订单评价详情 -->
+    <select id="selectById" parameterType="decimal" resultMap="orderEvaluation">
+        SELECT
+        <include refid="orderEvaluationCols"/>
+        FROM t_order_evaluation WHERE id = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 更新订单评价 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.OrderEvaluation">
+        UPDATE t_order_evaluation
+        SET
+        order_id = #{orderId,jdbcType=NUMERIC},
+        attitude = #{attitude,jdbcType=NUMERIC},
+        skill = #{skill,jdbcType=NUMERIC},
+        environment = #{environment,jdbcType=NUMERIC},
+        efficiency = #{efficiency,jdbcType=NUMERIC},
+        average = #{average,jdbcType=NUMERIC},
+        overall_evaluation = #{overallEvaluation,jdbcType=NUMERIC},
+        content = #{content,jdbcType=VARCHAR},
+        evaluate_time = #{evaluateTime,jdbcType=TIMESTAMP}
+        WHERE id = #{id,jdbcType=NUMERIC}
+    </update>
+
+    <!-- 插入订单评价 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.OrderEvaluation" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_order_evaluation (
+`order_id`,
+`attitude`,
+`skill`,
+`environment`,
+`efficiency`,
+`average`,
+`overall_evaluation`,
+`content`,
+`evaluate_time`
+
+        ) VALUES (
+#{orderId,jdbcType=NUMERIC},
+#{attitude,jdbcType=NUMERIC},
+#{skill,jdbcType=NUMERIC},
+#{environment,jdbcType=NUMERIC},
+ #{efficiency,jdbcType=NUMERIC},
+#{average,jdbcType=NUMERIC},
+#{overallEvaluation,jdbcType=NUMERIC},
+#{content,jdbcType=VARCHAR},
+CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <!-- 查询订单评价详情 -->
+    <select id="selectByOrderId" parameterType="decimal" resultMap="orderEvaluation">
+        SELECT
+        <include refid="orderEvaluationCols"/>
+        FROM t_order_evaluation WHERE order_id = #{value,jdbcType=NUMERIC}
+    </select>
+
+
+    <sql id="selectOrderEvaluationListCondition">
+    <where>
+    <if test="shopId != null">AND ts.id = #{shopId,jdbcType=NUMERIC}</if>
+    </where>
+    </sql>
+    <!-- 查询订单评价列表-->
+    <select id="selectOrderEvaluationList" parameterType="com.ych.shcm.o2o.parameter.QueryOrderEvaluationListParameter" resultMap="orderEvaluation">
+        SELECT
+        <include refid="com.ych.shcm.o2o.dao.mybatis.OrderMapper.orderPrefixCols">
+            <property name="tableName" value="to"/>
+            <property name="colPrefix" value="to_"/>
+        </include>
+        ,
+        <include refid="orderEvaluationPrefixCols">
+            <property name="tableName" value="te"/>
+            <property name="colPrefix" value=""/>
+        </include>
+        FROM  t_order as `to` JOIN t_shop ts ON `to`.shop_id = ts.id JOIN  t_order_evaluation  te ON `to`.id = te.order_id
+        <include refid="selectOrderEvaluationListCondition"/>
+    </select>
+    <select id="selectOrderEvaluationList_count" parameterType="com.ych.shcm.o2o.parameter.QueryOrderListParameter"
+            resultType="long">
+        SELECT COUNT(1)
+        FROM  t_order td JOIN t_shop ts ON td.shop_id = ts.id JOIN  t_order_evaluation  te ON td.id = te.order_id
+        <include refid="selectOrderEvaluationListCondition"/>
+
+    </select>
+
+</mapper>

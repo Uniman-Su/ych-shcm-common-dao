@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.UserCarMapper">
+
+    <!-- 车辆 -->
+    <resultMap id="userCar" type="com.ych.shcm.o2o.model.UserCar">
+        <id column="id" property="id" jdbcType="NUMERIC" />
+        <result column="user_id" property="userId" jdbcType="NUMERIC" />
+        <result column="car_id" property="carId" jdbcType="NUMERIC" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <association property="user" resultMap="com.ych.shcm.o2o.dao.mybatis.UserMapper.user" columnPrefix="tu_" />
+        <association property="car" resultMap="com.ych.shcm.o2o.dao.mybatis.CarMapper.car" columnPrefix="tc_" />
+    </resultMap>
+
+    <!-- 用户历史信息 -->
+    <resultMap id="userHistory" type="com.ych.shcm.o2o.model.CarUserHistory">
+        <id column="id" property="id" jdbcType="NUMERIC" />
+        <result column="old_user_id" property="oldUserId" jdbcType="NUMERIC" />
+        <result column="user_id" property="userId" jdbcType="NUMERIC" />
+        <result column="car_id" property="carId" jdbcType="NUMERIC" />
+        <result column="change_time" property="changeTime" jdbcType="TIMESTAMP" />
+        <association property="oldUser" resultMap="com.ych.shcm.o2o.dao.mybatis.UserMapper.user" columnPrefix="tou_" />
+        <association property="user" resultMap="com.ych.shcm.o2o.dao.mybatis.UserMapper.user" columnPrefix="tu_" />
+        <association property="car" resultMap="com.ych.shcm.o2o.dao.mybatis.CarMapper.car" columnPrefix="tc_" />
+    </resultMap>
+
+    <!-- 用户车辆列 -->
+    <sql id="userCarCols">
+`id`,
+`user_id`,
+`car_id`,
+`create_time`
+    </sql>
+    <sql id="userCarPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`user_id` AS `${colPrefix}user_id`,
+`${tableName}`.`car_id` AS `${colPrefix}car_id`,
+`${tableName}`.`create_time` AS `${colPrefix}create_time`
+    </sql>
+
+    <!-- 用户历史信息列 -->
+    <sql id="userHistoryCols">
+`id`,
+`old_user_id`,
+`user_id`,
+`car_id`,
+`change_time`
+    </sql>
+    <sql id="userHistoryPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`old_user_id` AS `${colPrefix}old_user_id`,
+`${tableName}`.`user_id` AS `${colPrefix}user_id`,
+`${tableName}`.`car_id` AS `${colPrefix}car_id`,
+`${tableName}`.`change_time` AS `${colPrefix}change_time`
+    </sql>
+
+    <!-- 插入用户车辆 -->
+    <insert id="insertUserCar" parameterType="com.ych.shcm.o2o.model.UserCar" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_user_car (
+`user_id`,
+`car_id`
+) VALUES (
+#{userId,jdbcType=NUMERIC},
+#{carId,jdbcType=NUMERIC}
+)
+    </insert>
+
+    <!-- 根据ID删除数据 -->
+    <delete id="deleteUserCarById" parameterType="decimal">
+DELETE FROM t_user_car WHERE `id` = #{value,jdbcType=NUMERIC}
+    </delete>
+
+    <!-- 根据ID查询用户车辆信息 -->
+    <select id="selectUserCarById" parameterType="decimal" resultMap="userCar">
+SELECT <include refid="userCarCols" /> FROM t_user_car WHERE `id` = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 根据用户名查询一个车辆ID -->
+    <select id="selectOneByUserId" parameterType="decimal" resultMap="userCar">
+SELECT <include refid="userCarCols" /> FROM t_user_car WHERE `user_id` = #{value,jdbcType=NUMERIC} LIMIT 0, 1
+    </select>
+    <!-- 根据车辆名查询车辆与用户关联 -->
+    <select id="selectUserCarByCarId" parameterType="decimal" resultMap="userCar">
+SELECT <include refid="userCarCols" /> FROM t_user_car WHERE `car_id` = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 根据用户ID和车型ID查询用户车辆信息 -->
+    <select id="selectUserCarByUserIdAndCarId" parameterType="map" resultMap="userCar">
+SELECT <include refid="userCarCols" />
+  FROM t_user_car
+ WHERE `user_id` = #{userId,jdbcType=NUMERIC}
+   AND `car_id` = #{carId,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 查询车辆过期维护信息的列表 -->
+    <sql id="selectUserCarListCondition">
+<where>
+    <if test="brandId != null">tcs.brand_id = #{brandId,jdbcType=NUMERIC}</if>
+    <if test="factoryId != null">AND tcs.factory_id = #{factoryId,jdbcType=NUMERIC}</if>
+    <if test="seriesId != null">AND tcm.series_id = #{seriesId,jdbcType=NUMERIC}</if>
+    <if test="year != null">AND tcm.year = #{year,jdbcType=NUMERIC}</if>
+    <if test="modelId != null">AND tc.model_id = #{modelId,jdbcType=NUMERIC}</if>
+    <if test="vin != null and vin.length() > 0">AND tc.vin = #{vin,jdbcType=VARCHAR}</if>
+    <if test="effectTimeBegin != null">AND tc.effect_time >= #{effectTimeBegin,jdbcType=TIMESTAMP}</if>
+    <if test="effectTimeEnd != null">AND tc.effect_time &lt;= #{effectTimeEnd,jdbcType=TIMESTAMP}</if>
+    <if test="expiresBegin != null">AND tc.expires >= #{expiresBegin,jdbcType=TIMESTAMP}</if>
+    <if test="expiresEnd != null">AND tc.expires &lt;= #{expiresEnd,jdbcType=TIMESTAMP}</if>
+    <if test="firstMaintenanceTimeBegin != null">AND tc.first_mtime >= #{firstMaintenanceTimeBegin,jdbcType=TIMESTAMP}</if>
+    <if test="firstMaintenanceTimeEnd != null">AND tc.first_mtime &lt;= #{firstMaintenanceTimeEnd,jdbcType=TIMESTAMP}</if>
+    <if test="firstOrderStatuses != null and firstOrderStatuses.size() > 0">
+        AND
+        <choose>
+            <when test="firstOrderStatuses.size() == 1">
+                tc.first_order_status = #{firstOrderStatuses[0],jdbcType=NUMERIC}
+            </when>
+            <otherwise>
+                tc.first_order_status IN (<foreach collection="firstOrderStatuses" item="status" separator=",">#{status,jdbcType=NUMERIC}</foreach>)
+            </otherwise>
+        </choose>
+    </if>
+    <if test="userId != null">AND tuc.user_id = #{userId,jdbcType=NUMERIC}</if>
+</where>
+    </sql>
+    <select id="selectUserCarList" parameterType="com.ych.shcm.o2o.parameter.QueryUserCarParameter" resultMap="userCar">
+SELECT
+        <include refid="userCarPrefixCols">
+            <property name="tableName" value="tuc" />
+            <property name="colPrefix" value="" />
+        </include>,
+       <include refid="com.ych.shcm.o2o.dao.mybatis.CarMapper.carPrefixCols">
+           <property name="tableName" value="tc" />
+           <property name="colPrefix" value="tc_" />
+       </include>,
+       <include refid="com.ych.shcm.o2o.dao.mybatis.UserMapper.userPrefixCols">
+           <property name="tableName" value="tu" />
+           <property name="colPrefix" value="tu_" />
+       </include>
+  FROM t_user_car AS tuc
+       JOIN t_car AS tc ON tc.id = tuc.car_id
+       JOIN t_user AS tu ON tu.id = tuc.user_id
+       <if test="year != null or seriesId != null">JOIN t_car_model AS tcm ON tc.model_id = tcm.id</if>
+       <if test="factoryId != null or brandId != null">JOIN t_car_series AS tcs ON tcs.id = tcm.series_id</if>
+<include refid="selectUserCarListCondition" />
+ORDER BY tc.effect_time DESC
+    </select>
+    <select id="selectUserCarList_count" parameterType="com.ych.shcm.o2o.parameter.QueryUserCarParameter" resultType="long">
+SELECT COUNT(1)
+  FROM t_user_car AS tuc
+       JOIN t_car AS tc ON tc.id = tuc.car_id
+       <if test="year != null or seriesId != null">JOIN t_car_model AS tcm ON tcem.model_id = tcm.id</if>
+       <if test="factoryId != null or brandId != null">JOIN t_car_series AS tcs ON tcs.id = tcm.series_id</if>
+<include refid="selectUserCarListCondition" />
+    </select>
+
+    <!-- 插入车辆的用户历史 -->
+    <insert id="insertUserHistory" parameterType="com.ych.shcm.o2o.model.CarUserHistory" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_car_user_his (
+`old_user_id`,
+`user_id`,
+`car_id`,
+`change_time`
+) VALUES (
+#{oldUserId,jdbcType=NUMERIC},
+#{userId,jdbcType=NUMERIC},
+#{carId,jdbcType=NUMERIC},
+#{changeTime,jdbcType=TIMESTAMP}
+)
+    </insert>
+
+    <!-- 查询用户车辆历史信息 -->
+    <sql id="selectUserHistoryListCondition">
+<where>
+    <if test="brandId != null">tcs.brand_id = #{brandId,jdbcType=NUMERIC}</if>
+    <if test="factoryId != null">AND tcs.factory_id = #{factoryId,jdbcType=NUMERIC}</if>
+    <if test="seriesId != null">AND tcm.series_id = #{seriesId,jdbcType=NUMERIC}</if>
+    <if test="year != null">AND tcm.year = #{year,jdbcType=NUMERIC}</if>
+    <if test="modelId != null">AND tc.model_id = #{modelId,jdbcType=NUMERIC}</if>
+    <if test="vin != null and vin.length() > 0">AND tc.vin = #{vin,jdbcType=VARCHAR}</if>
+    <if test="effectTimeBegin != null">AND tc.effect_time >= #{effectTimeBegin,jdbcType=TIMESTAMP}</if>
+    <if test="effectTimeEnd != null">AND tc.effect_time &lt;= #{effectTimeEnd,jdbcType=TIMESTAMP}</if>
+    <if test="expiresBegin != null">AND tc.expires >= #{expiresBegin,jdbcType=TIMESTAMP}</if>
+    <if test="expiresEnd != null">AND tc.expires &lt;= #{expiresEnd,jdbcType=TIMESTAMP}</if>
+    <if test="firstMaintenanceTimeBegin != null">AND tc.first_mtime >= #{firstMaintenanceTimeBegin,jdbcType=TIMESTAMP}</if>
+    <if test="firstMaintenanceTimeEnd != null">AND tc.first_mtime &lt;= #{firstMaintenanceTimeEnd,jdbcType=TIMESTAMP}</if>
+    <if test="firstOrderStatuses != null and firstOrderStatuses.size() > 0">
+        AND
+        <choose>
+            <when test="firstOrderStatuses.size() == 1">
+                tc.first_order_status = #{firstOrderStatuses[0],jdbcType=NUMERIC}
+            </when>
+            <otherwise>
+                tc.first_order_status IN (<foreach collection="firstOrderStatuses" item="status" separator=",">#{status,jdbcType=NUMERIC}</foreach>)
+            </otherwise>
+        </choose>
+    </if>
+    <if test="carId != null">AND tcuh.car_id = #{carId,jdbcType=NUMERIC}</if>
+    <if test="userId != null">AND tcuh.user_id = #{userId,jdbcType=NUMERIC}</if>
+    <if test="oldUserId != null">AND tcuh.old_user_id = #{oldUserId,jdbcType=NUMERIC}</if>
+    <if test="changeTimeBegin != null">AND tcuh.change_time >= #{changeTimeBegin,jdbcType=TIMESTAMP}</if>
+    <if test="changeTimeEnd != null">AND tcuh.change_time &lt;= #{changeTimeEnd,jdbcType=TIMESTAMP}</if>
+</where>
+    </sql>
+    <select id="selectUserHistoryList" parameterType="com.ych.shcm.o2o.parameter.QueryCarUserHistoryParameter" resultMap="userHistory">
+SELECT <include refid="userCarPrefixCols">
+           <property name="tableName" value="tc" />
+           <property name="colPrefix" value="" />
+       </include>,
+       <include refid="com.ych.shcm.o2o.dao.mybatis.CarMapper.carPrefixCols">
+           <property name="tableName" value="tc" />
+           <property name="colPrefix" value="tc_" />
+       </include>,
+       <include refid="com.ych.shcm.o2o.dao.mybatis.UserMapper.userPrefixCols">
+           <property name="tableName" value="tu" />
+           <property name="colPrefix" value="tu_" />
+       </include>,
+       <include refid="com.ych.shcm.o2o.dao.mybatis.UserMapper.userPrefixCols">
+           <property name="tableName" value="tou" />
+           <property name="colPrefix" value="tou_" />
+       </include>
+  FROM t_car_user_his AS tcuh
+       JOIN t_car AS tc ON tc.id = tcuh.car_id
+       JOIN t_user AS tu ON tu.id = tcuh.user_id
+       JOIN t_user AS tou ON tou.id = tcuh.old_user_id
+       <if test="year != null or seriesId != null">JOIN t_car_model AS tcm ON tc.model_id = tcm.id</if>
+       <if test="factoryId != null or brandId != null">JOIN t_car_series AS tcs ON tcs.id = tcm.series_id</if>
+<include refid="selectUserHistoryListCondition" />
+ORDER BY tc.effect_time DESC
+    </select>
+    <select id="selectUserHistoryList_count" parameterType="com.ych.shcm.o2o.parameter.QueryUserCarParameter" resultType="long">
+SELECT COUNT(1)
+  FROM t_user_car AS tuc
+       JOIN t_car AS tc ON tc.id = tuc.car_id
+       <if test="year != null or seriesId != null">JOIN t_car_model AS tcm ON tcem.model_id = tcm.id</if>
+       <if test="factoryId != null or brandId != null">JOIN t_car_series AS tcs ON tcs.id = tcm.series_id</if>
+<include refid="selectUserHistoryListCondition" />
+    </select>
+    
+</mapper>

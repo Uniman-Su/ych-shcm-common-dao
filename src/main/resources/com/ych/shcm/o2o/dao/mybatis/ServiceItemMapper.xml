@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.ServiceItemMapper">
+
+    <!-- 服务项目 -->
+    <resultMap id="serviceItem" type="com.ych.shcm.o2o.model.ServiceItem">
+        <id column="id" property="id" jdbcType="NUMERIC"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="price" property="price" jdbcType="NUMERIC"/>
+        <result column="icon_path" property="iconPath" jdbcType="VARCHAR"/>
+        <result column="comment" property="comment" jdbcType="VARCHAR"/>
+        <result column="brokerage" property="brokerage" jdbcType="NUMERIC"/>
+        <result column="type" property="type" jdbcType="NUMERIC"/>
+        <result column="status" property="status" jdbcType="NUMERIC"/>
+        <result column="modifier_id" property="modifierId" jdbcType="NUMERIC"/>
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP"/>
+
+    </resultMap>
+
+
+    <!-- 服务项目的列 -->
+    <sql id="serviceItemCols">
+`id`,
+`name`,
+`price`,
+`icon_path`,
+`comment`,
+`brokerage`,
+`type`,
+`status`,
+`modifier_id`,
+`modify_time`
+    </sql>
+    <sql id="serviceItemPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`name` AS `${colPrefix}name`,
+`${tableName}`.`price` AS `${colPrefix}price`,
+`${tableName}`.`icon_path` AS `${colPrefix}icon_path`,
+`${tableName}`.`comment` AS `${colPrefix}comment`,
+`${tableName}`.`brokerage` AS `${colPrefix}brokerage`,
+`${tableName}`.`type` AS `${colPrefix}type`,
+`${tableName}`.`status` AS `${colPrefix}status`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+    </sql>
+
+    <!-- 查询服务项目详情 -->
+    <select id="selectById" parameterType="decimal" resultMap="serviceItem">
+        SELECT
+        <include refid="serviceItemCols"/>
+        FROM t_service_item WHERE id = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 更新服务项目 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.ServiceItem">
+        UPDATE t_service_item
+        SET
+        name = #{name,jdbcType=NUMERIC},
+        price = #{price,jdbcType=NUMERIC},
+        icon_path = #{iconPath,jdbcType=VARCHAR},
+        comment = #{comment,jdbcType=VARCHAR},
+        brokerage = #{brokerage,jdbcType=VARCHAR},
+        type = #{type,jdbcType=VARCHAR},
+        status = #{status,jdbcType=VARCHAR},
+        modifier_id = #{modifierId,jdbcType=VARCHAR},
+        modify_time = #{modifyTime,jdbcType=TIMESTAMP}
+        WHERE id = #{id,jdbcType=NUMERIC}
+    </update>
+
+    <!-- 插入服务项目 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.ServiceItem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_service_item (
+`name`,
+`icon_path`,
+`status`,
+`desc`,
+`comment`,
+`modifier_id`,
+`modify_time`
+        ) VALUES (
+#{name,jdbcType=NUMERIC},
+#{iconPath,jdbcType=VARCHAR},
+#{status,jdbcType=VARCHAR},
+#{desc,jdbcType=VARCHAR},
+#{comment,jdbcType=VARCHAR},
+#{modifierId,jdbcType=VARCHAR},
+#{modifyTime,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <!-- 删除服务项目 -->
+    <select id="delete" parameterType="decimal">
+        DELETE
+        FROM t_service_item WHERE id = #{value,jdbcType=NUMERIC}
+    </select>
+
+
+    <!-- 查询服务项目列表 -->
+    <sql id="selectServiceItemListCondition">
+        <where>
+            <if test="name != null and name.length() >0">AND t.name = #{name,jdbcType=VARCHAR}</if>
+            <if test="status != null ">AND t.status = #{status,jdbcType=NUMERIC}</if>
+            <if test="type != null ">AND t.type = #{type,jdbcType=NUMERIC}</if>
+        </where>
+    </sql>
+    <select id="selectServiceItemList_count" parameterType="com.ych.shcm.o2o.parameter.QueryServiceItemListParameter"
+            resultType="long">
+        SELECT COUNT(1)
+        FROM
+        t_service_item t
+        <include refid="selectServiceItemListCondition"/>
+    </select>
+    <select id="selectServiceItemList" parameterType="com.ych.shcm.o2o.parameter.QueryServiceItemListParameter"
+            resultMap="serviceItem">
+        SELECT
+        <include refid="serviceItemPrefixCols">
+            <property name="tableName" value="t"/>
+            <property name="colPrefix" value=""/>
+        </include>
+
+        FROM t_service_item t
+        <include refid="selectServiceItemListCondition"/>
+        <choose>
+            <when test="sort != null and sort.length() > 0">ORDER BY `${sort}`
+                <if test="order != null">${order}</if>
+            </when>
+            <otherwise>
+                ORDER BY id DESC
+            </otherwise>
+        </choose>
+        LIMIT #{startIndex,jdbcType=NUMERIC}, #{pageSize,jdbcType=NUMERIC}
+    </select>
+
+    <select id="selectServiceItemsOfPack" parameterType="decimal"
+            resultMap="serviceItem">
+        SELECT
+        <include refid="serviceItemPrefixCols">
+            <property name="tableName" value="t"/>
+            <property name="colPrefix" value=""/>
+        </include>
+
+        FROM t_service_pack_item tt LEFT JOIN  t_service_item t on tt.item_id = t.id  WHERE t.status = 0 AND tt.pack_id = #{value,jdbcType=NUMERIC}
+        ORDER BY tt.sort
+    </select>
+
+
+
+</mapper>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.ServiceProviderMapper">
+
+    <!-- 服务商 -->
+    <resultMap id="serviceProvider" type="com.ych.shcm.o2o.model.ServiceProvider">
+        <id column="id" property="id" jdbcType="NUMERIC" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="area_id" property="areaId" jdbcType="VARCHAR" />
+        <result column="address" property="address" jdbcType="VARCHAR" />
+        <result column="modifier_id" property="modifierId" jdbcType="NUMERIC" />
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <!-- 服务业务地区 -->
+    <resultMap id="businessArea" type="com.ych.shcm.o2o.model.ServiceProviderBusinessArea">
+        <result column="service_provider_id" property="serviceProviderId" jdbcType="NUMERIC" />
+        <result column="area_id" property="areaId" jdbcType="VARCHAR" />
+        <result column="modifier_id" property="modifierId" jdbcType="NUMERIC" />
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <!-- 服务商列 -->
+    <sql id="serviceProviderCols">
+`id`,
+`name`,
+`area_id`,
+`address`,
+`modifier_id`,
+`modify_time`
+    </sql>
+    <sql id="serviceProviderPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`name` AS `${colPrefix}name`,
+`${tableName}`.`area_id` AS `${colPrefix}area_id`,
+`${tableName}`.`address` AS `${colPrefix}address`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+    </sql>
+
+    <!-- 业务地区列 -->
+    <sql id="businessAreaCols">
+`service_provider_id`,
+`area_id`,
+`modifier_id`,
+`modify_time`
+    </sql>
+    <sql id="businessAreaPrefixCols">
+`${tableName}`.`service_provider_id` AS `${colPrefix}service_provider_id`,
+`${tableName}`.`area_id` AS `${colPrefix}area_id`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+    </sql>
+
+    <!-- 插入服务商 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.ServiceProvider" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_service_provider(
+`name`,
+`area_id`,
+`address`,
+`modifier_id`
+) VALUES (
+#{name,jdbcType=VARCHAR},
+#{areaId,jdbcType=VARCHAR},
+#{address,jdbcType=VARCHAR},
+#{modifierId,jdbcType=NUMERIC}
+)
+    </insert>
+
+    <!-- 更新服务商信息 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.ServiceProvider">
+UPDATE t_service_provider
+   SET `name` = #{name,jdbcType=VARCHAR},
+       `area_id` = #{areaId,jdbcType=VARCHAR},
+       `address` = #{address,jdbcType=VARCHAR},
+       `modifier_id` = #{modifierId,jdbcType=NUMERIC},
+       `modify_time` = CURRENT_TIMESTAMP
+ WHERE `id` = #{id,jdbcType=NUMERIC}
+   AND `modify_time` = #{modifyTime,jdbcType=TIMESTAMP}
+    </update>
+
+    <!-- 根据ID查询服务商信息 -->
+    <select id="selectById" parameterType="decimal" resultMap="serviceProvider">
+SELECT <include refid="serviceProviderCols" />
+  FROM t_service_provider
+ WHERE `id` = #{id,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 根据业务地区ID查询服务商信息 -->
+    <select id="selectByBusinessAreaId" parameterType="string" resultMap="serviceProvider">
+SELECT <include refid="serviceProviderCols" />
+  FROM t_service_provider AS t
+ WHERE EXISTS (
+    SELECT 1
+      FROM t_service_provider_buziarea
+     WHERE service_provider_id = t.id
+       AND area_id = #{value,jdbcType=VARCHAR}
+)
+    </select>
+
+    <!-- 插入业务地区 -->
+    <insert id="insertBusinessArea" parameterType="collection">
+INSERT INTO t_service_provider_buziarea (
+`service_provider_id`,
+`area_id`,
+`modifier_id`,
+) VALUES <foreach collection="collection" separator="," item="area">(
+#{area.serviceProviderId,jdbcType=NUMERIC},
+#{area.areaId,jdbcType=VARCHAR},
+#{area.modifierId,jdbcType=NUMERIC}
+)</foreach>
+ON DUPLICATE KEY UPDATE
+`modifier_id` = VALUES(modifier_id),
+`modify_time` = CURRENT_TIMESTAMP
+    </insert>
+
+    <!-- 删除业务地区 -->
+    <delete id="deleteBusinessArea" parameterType="map">
+DELETE FROM t_service_provider_buziarea
+WHERE `service_provider_id` = #{serviceProviderId,jdbcType=NUMERIC}
+<if test="areaIds != null and areaIds.size() > 0">AND `area_id` IN (<foreach collection="areaIds" item="areaId" separator=",">#{areaId,jdbcType=VARCHAR}</foreach>)</if>
+    </delete>
+
+</mapper>

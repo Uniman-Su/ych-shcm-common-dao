@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.AccessChannelMapper">
+
+    <!-- 访问渠道映射 -->
+    <resultMap id="accessChannel" type="com.ych.shcm.o2o.model.AccessChannel">
+        <id column="id" property="id" jdbcType="NUMERIC" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="code" property="code" jdbcType="VARCHAR" />
+        <result column="security_key" property="securityKey" jdbcType="VARCHAR" />
+        <result column="notify_url" property="notifyUrl" jdbcType="VARCHAR" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="modifier_id" property="modifierId" jdbcType="NUMERIC" />
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <!-- 访问渠道列 -->
+    <sql id="accessChannelCols">
+`id`,
+`name`,
+`code`,
+`security_key`,
+`notify_url`,
+`create_time`,
+`modifier_id`,
+`modify_time`
+    </sql>
+    <sql id="accessChannelPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`name` AS `${colPrefix}name`,
+`${tableName}`.`code` AS `${colPrefix}code`,
+`${tableName}`.`security_key` AS `${colPrefix}security_key`,
+`${tableName}`.`notify_url` AS `${colPrefix}notify_url`,
+`${tableName}`.`create_time` AS `${colPrefix}create_time`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+    </sql>
+
+    <!-- 根据ID查询访问渠道信息 -->
+    <select id="selectById" parameterType="decimal" resultMap="accessChannel">
+SELECT <include refid="accessChannelCols" />
+  FROM t_access_channel
+ WHERE `id` = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 根据编码查询访问渠道信息 -->
+    <select id="selectByCode" parameterType="string" resultMap="accessChannel">
+SELECT <include refid="accessChannelCols" />
+  FROM t_access_channel
+ WHERE `code` = #{value,jdbcType=NUMERIC}
+    </select>
+
+</mapper>

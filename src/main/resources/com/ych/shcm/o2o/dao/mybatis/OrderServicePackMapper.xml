@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.OrderServicePackMapper">
+
+    <!-- 订单服务包 -->
+    <resultMap id="orderServicePack" type="com.ych.shcm.o2o.model.OrderServicePack">
+        <id column="id" property="id" jdbcType="NUMERIC"/>
+        <result column="order_id" property="orderId" jdbcType="NUMERIC"/>
+        <result column="service_pack_id" property="servicePackId" jdbcType="NUMERIC"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="icon_path" property="iconPath" jdbcType="VARCHAR"/>
+        <result column="price" property="price" jdbcType="NUMERIC"/>
+        <collection property="orderServicePackItems"
+                    resultMap="com.ych.shcm.o2o.dao.mybatis.OrderServicePackItemMapper.orderServicePackItem" columnPrefix ="ti_"/>
+    </resultMap>
+
+
+    <!-- 订单服务包的列 -->
+    <sql id="orderServicePackCols">
+`id`,
+`order_id`,
+`service_pack_id`,
+`name`,
+`icon_path`,
+`price`
+    </sql>
+    <sql id="orderServicePackPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`order_id` AS `${colPrefix}order_id`,
+`${tableName}`.`service_pack_id` AS `${colPrefix}service_pack_id`,
+`${tableName}`.`name` AS `${colPrefix}name`,
+`${tableName}`.`icon_path` AS `${colPrefix}icon_path`,
+`${tableName}`.`price` AS `${colPrefix}price`
+    </sql>
+
+    <!-- 查询订单服务包详情 -->
+    <select id="selectById" parameterType="decimal" resultMap="orderServicePack">
+        SELECT
+        <include refid="orderServicePackCols"/>
+        FROM t_order_service_pack WHERE id = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 更新订单服务包 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.OrderServicePack">
+        UPDATE t_order_service_pack
+        SET
+        order_id = #{orderId,jdbcType=NUMERIC},
+        service_pack_id = #{servicePackId,jdbcType=NUMERIC},
+        name = #{name,jdbcType=VARCHAR},
+        icon_path = #{iconPath,jdbcType=VARCHAR},
+        price = #{price,jdbcType=NUMERIC}
+        WHERE id = #{id,jdbcType=NUMERIC}
+    </update>
+
+    <!-- 插入订单服务包 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.OrderServicePack" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO t_order_service_pack (
+`id`,
+`order_id`,
+`service_pack_id`,
+`name`,
+`icon_path`,
+`price`
+        ) VALUES (
+        #{id,jdbcType=NUMERIC},
+        #{orderId,jdbcType=NUMERIC},
+        #{servicePackId,jdbcType=NUMERIC},
+        #{name,jdbcType=VARCHAR},
+        #{iconPath,jdbcType=VARCHAR},
+        #{price,jdbcType=NUMERIC}
+        )
+    </insert>
+
+
+    <!-- 插入订单服务包列表 -->
+    <insert id="insertList" parameterType="collection" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO t_order_service_pack (
+        `id`,
+        `order_id`,
+        `service_pack_id`,
+        `name`,
+        `icon_path`,
+        `price`
+        ) VALUES
+        <foreach collection="collection" item="item" separator=",">(
+            #{id,jdbcType=NUMERIC},
+            #{orderId,jdbcType=NUMERIC},
+            #{servicePackId,jdbcType=NUMERIC},
+            #{name,jdbcType=VARCHAR},
+            #{iconPath,jdbcType=VARCHAR},
+            #{price,jdbcType=NUMERIC}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 删除订单服务包 -->
+    <select id="delete" parameterType="decimal">
+        DELETE
+        FROM t_order_service_pack WHERE id = #{value,jdbcType=NUMERIC}
+    </select>
+
+
+    <!-- 查询订单服务包详情 -->
+    <select id="selectByOrderId" parameterType="map" resultMap="orderServicePack">
+        SELECT
+        <include refid="orderServicePackPrefixCols">
+            <property name="tableName" value="tp" />
+            <property name="colPrefix" value="" />
+        </include>
+        <if test="needItems == true" >
+        ,<include refid="com.ych.shcm.o2o.dao.mybatis.OrderServicePackItemMapper.orderServicePackItemPrefixCols">
+            <property name="tableName" value="ti" />
+            <property name="colPrefix" value="ti_" />
+        </include>
+        </if>
+        FROM t_order_service_pack tp
+        <if test="needItems == true" >
+           LEFT JOIN t_order_service_pack_item ti on tp.id =  ti.order_service_pack_id
+        </if>
+        WHERE order_id = #{orderId,jdbcType=NUMERIC}
+    </select>
+
+
+</mapper>

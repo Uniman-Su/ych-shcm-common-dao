@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.AreaDaoMapper">
+
+    <!-- 地区映射 -->
+    <resultMap id="area" type="com.ych.shcm.o2o.model.Area">
+        <id column="id" property="id" jdbcType="VARCHAR" />
+        <result column="area_name" property="name" jdbcType="VARCHAR" />
+        <result column="parent_id" property="parentId" jdbcType="VARCHAR" />
+        <result column="lft" property="left" jdbcType="NUMERIC" />
+        <result column="rgt" property="right" jdbcType="NUMERIC" />
+    </resultMap>
+
+    <!-- 地区的列 -->
+    <sql id="areaCols">
+`id`,
+`area_name`,
+`parent_id`,
+`lft`,
+`rgt`
+    </sql>
+    <sql id="areaPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`area_name` AS `${colPrefix}area_name`,
+`${tableName}`.`parent_id` AS `${colPrefix}parent_id`,
+`${tableName}`.`lft` AS `${colPrefix}lft`,
+`${tableName}`.`rgt` AS `${colPrefix}rgt`
+    </sql>
+
+    <!-- 根据地区ID查询地区信息 -->
+    <select id="selectById" resultMap="area" parameterType="string">
+SELECT <include refid="areaCols" />
+  FROM t_area
+ WHERE `id` = #{value,jdbcType=VARCHAR}
+    </select>
+
+    <!-- 根据父节点查询地区列表 -->
+    <select id="selectByParentId" resultMap="area" parameterType="string">
+SELECT <include refid="areaCols" />
+  FROM t_area
+ WHERE `parent_id` = #{value,jdbcType=VARCHAR}
+ORDER BY `lft`
+    </select>
+
+    <!-- 查询祖先节点 -->
+    <select id="selectAncestors" resultMap="area" parameterType="map">
+SELECT <include refid="areaCols" />
+  FROM t_area
+ WHERE `lft` &lt;= #{left,jdbcType=VARCHAR}
+   AND `rgt` >= #{right,jdbcType=NUMERIC}
+ORDER BY `lft`
+    </select>
+
+    <!-- 查询祖先节点ID -->
+    <select id="selectAncestorIds" resultType="string" parameterType="map">
+SELECT `id`
+  FROM t_area
+ WHERE `lft` &lt;= #{left,jdbcType=VARCHAR}
+   AND `rgt` >= #{right,jdbcType=NUMERIC}
+ORDER BY `lft`
+    </select>
+
+    <!-- 查询子孙节点 -->
+    <select id="selectDescendants" resultMap="area" parameterType="map">
+SELECT <include refid="areaCols" />
+  FROM t_area
+ WHERE `lft` >= #{left,jdbcType=VARCHAR}
+   AND `rgt` &lt;= #{right,jdbcType=NUMERIC}
+ORDER BY `lft`
+    </select>
+
+    <!-- 查询子孙节点ID -->
+    <select id="selectDescendantIds" resultType="string" parameterType="map">
+SELECT `id`
+  FROM t_area
+ WHERE `lft` >= #{left,jdbcType=VARCHAR}
+   AND `rgt` &lt;= #{right,jdbcType=NUMERIC}
+ORDER BY `lft`
+    </select>
+
+</mapper>

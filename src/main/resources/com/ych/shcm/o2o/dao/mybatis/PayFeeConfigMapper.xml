@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.PayFeeConfigMapper">
+
+    <!-- 支付费用配置 -->
+    <resultMap type="com.ych.shcm.o2o.model.PayFeeConfig" id="payFeeConfig">
+        <id column="id" property="id" jdbcType="NUMERIC"/>
+        <result column="pay_channel" property="payChannel" jdbcType="NUMERIC"/>
+        <result column="fixed" property="fixed" jdbcType="NUMERIC"/>
+        <result column="fee_rate" property="feeRate" jdbcType="NUMERIC"/>
+        <result column="fixed_fee" property="fixedFee" jdbcType="NUMERIC"/>
+        <result column="fee_limit" property="feeLimit" jdbcType="NUMERIC"/>
+        <result column="begin_fee" property="beginFee" jdbcType="NUMERIC"/>
+        <result column="refundable" property="refundable" jdbcType="NUMERIC"/>
+    </resultMap>
+
+    <sql id="payFeeConfigCols">
+        id,
+        pay_channel,
+        fixed,
+        fee_rate,
+        fixed_fee,
+        fee_limit,
+        begin_fee,
+        refundable
+    </sql>
+    <sql id="payFeeConfigPrefixCols">
+        `${tableName}`.id as `${colPrefix}id`,
+        `${tableName}`.pay_channel as `${colPrefix}pay_channel`,
+        `${tableName}`.fixed as `${colPrefix}fixed`,
+        `${tableName}`.fee_rate as `${colPrefix}fee_rate`,
+        `${tableName}`.fixed_fee as `${colPrefix}fixed_fee`,
+        `${tableName}`.fee_limit as `${colPrefix}fee_limit`,
+        `${tableName}`.begin_fee as `${colPrefix}begin_fee`,
+        `${tableName}`.refundable as `${colPrefix}refundable`
+    </sql>
+
+    <!-- 查询支付渠道费用配置 -->
+    <select id="selectByPayChannel" parameterType="com.ych.shcm.o2o.model.PayChannel" resultMap="payFeeConfig">
+        SELECT <include refid="payFeeConfigCols" /> FROM t_payfee WHERE pay_channel = #{value,jdbcType=NUMERIC}
+    </select>
+
+</mapper>

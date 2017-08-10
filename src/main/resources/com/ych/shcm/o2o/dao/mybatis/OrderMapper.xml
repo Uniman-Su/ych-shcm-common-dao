@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.OrderMapper">
+
+    <!-- 订单 -->
+    <resultMap id="order" type="com.ych.shcm.o2o.model.Order">
+        <id column="id" property="id" jdbcType="NUMERIC"/>
+        <result column="order_no" property="orderNo" jdbcType="VARCHAR"/>
+        <result column="user_id" property="userId" jdbcType="NUMERIC"/>
+        <result column="access_channel_id" property="accessChannelId" jdbcType="NUMERIC"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="status" property="status" jdbcType="NUMERIC"/>
+        <result column="shop_id" property="shopId" jdbcType="NUMERIC"/>
+        <result column="car_id" property="carId" jdbcType="NUMERIC"/>
+        <result column="money" property="money" jdbcType="NUMERIC"/>
+        <result column="service_provider_id" property="serviceProviderId" jdbcType="NUMERIC"/>
+        <result column="mileage" property="mileage" jdbcType="NUMERIC"/>
+        <result column="modifier_id" property="modifierId" jdbcType="NUMERIC"/>
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP"/>
+        <association property="shop" resultMap="com.ych.shcm.o2o.dao.mybatis.ShopMapper.shop"
+                     columnPrefix="ts_"/>
+        <association property="car" resultMap="com.ych.shcm.o2o.dao.mybatis.CarMapper.car"
+                     columnPrefix="tc_"/>
+        <association property="orderServicePacks"
+                     resultMap="com.ych.shcm.o2o.dao.mybatis.OrderServicePackMapper.orderServicePack"
+                     columnPrefix="tp_"/>
+    </resultMap>
+
+
+    <!-- 订单的列 -->
+    <sql id="orderCols">
+`id`,
+`order_no`,
+`user_id`,
+`access_channel_id`,
+`create_time`,
+`status`,
+`shop_id`,
+`car_id`,
+`money`,
+`service_provider_id`,
+`mileage`,
+`modifier_id`,
+`modify_time`
+    </sql>
+    <sql id="orderPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`order_no` AS `${colPrefix}order_no`,
+`${tableName}`.`user_id` AS `${colPrefix}user_id`,
+`${tableName}`.`access_channel_id` AS `${colPrefix}access_channel_id`,
+`${tableName}`.`create_time` AS `${colPrefix}create_time`,
+`${tableName}`.`status` AS `${colPrefix}status`,
+`${tableName}`.`shop_id` AS `${colPrefix}shop_id`,
+`${tableName}`.`car_id` AS `${colPrefix}car_id`,
+`${tableName}`.`money` AS `${colPrefix}money`,
+`${tableName}`.`service_provider_id` AS `${colPrefix}service_provider_id`,
+`${tableName}`.`mileage` AS `${colPrefix}mileage`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+    </sql>
+
+    <!-- 查询订单详情 -->
+    <select id="selectById" parameterType="decimal" resultMap="order">
+        SELECT
+        <include refid="orderCols"/>
+        FROM t_order WHERE id = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 查询订单详情 -->
+    <select id="selectByNo" parameterType="string" resultMap="order">
+        SELECT
+        <include refid="orderCols"/>
+        FROM t_order WHERE order_no = #{value,jdbcType=VARCHAR}
+    </select>
+
+    <!-- 更新订单 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.Order">
+UPDATE t_order
+   SET order_no = #{orderNo,jdbcType=VARCHAR},
+       user_id = #{userId,jdbcType=NUMERIC},
+       access_channel_id = #{accessChannelId,jdbcType=NUMERIC},
+       create_time = #{createTime,jdbcType=TIMESTAMP},
+       status = #{status,jdbcType=NUMERIC},
+       shop_id = #{shopId,jdbcType=NUMERIC},
+       car_id = #{carId,jdbcType=NUMERIC},
+       money = #{money,jdbcType=NUMERIC},
+       service_provider_id = #{serviceProviderId,jdbcType=NUMERIC},
+       mileage = #{mileage,jdbcType=NUMERIC},
+       modifier_id = #{modifierId,jdbcType=NUMERIC},
+       modify_time = CURRENT_TIMESTAMP
+ WHERE id = #{id,jdbcType=NUMERIC}
+   AND modify_time = #{modifyTime,jdbcType=TIMESTAMP}
+    </update>
+
+    <!-- 插入订单 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.Order" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_order (
+        `order_no`,
+`user_id`,
+`access_channel_id`,
+`status`,
+`shop_id`,
+`car_id`,
+`money`,
+`service_provider_id`,
+`mileage`,
+`modifier_id`
+        ) VALUES (
+        #{orderNo,jdbcType=VARCHAR},
+        #{userId,jdbcType=NUMERIC},
+        #{accessChannelId,jdbcType=NUMERIC},
+        #{status,jdbcType=NUMERIC},
+        #{shopId,jdbcType=NUMERIC},
+        #{carId,jdbcType=NUMERIC},
+        #{money,jdbcType=NUMERIC},
+        #{serviceProviderId,jdbcType=NUMERIC},
+        #{mileage,jdbcType=NUMERIC},
+        #{modifierId,jdbcType=NUMERIC}
+        )
+    </insert>
+
+    <!-- 查询订单列表 -->
+    <sql id="selectOrderListCondition">
+        <where>
+            <if test="orderNo != null and orderNo.length() >0">AND t.order_no = #{orderNo,jdbcType=VARCHAR}</if>
+            <if test="status != null and status.size() > 0">AND t.status IN(<foreach collection="status" item="item"
+                                                                                     separator=",">
+                #{item,jdbcType=NUMERIC}</foreach>)
+            </if>
+            <if test="vin != null and vin.length() > 0">AND tc.vin = #{vin,jdbcType=VARCHAR}</if>
+
+            <if test="shopName != null and shopName.length() > 0">AND ts.name LIKE CONCAT('%',
+                #{shopName,jdbcType=VARCHAR}, '%')
+            </if>
+            <if test="shopId != null">
+                AND ts.id = #{shopId,jdbcType=NUMERIC}
+            </if>
+            <if test="shopPhone != null and shopPhone.length() > 0">AND ts.phone = #{shopPhone,jdbcType=VARCHAR}</if>
+            <if test="userId != null">AND t.user_id = #{userId,jdbcType=NUMERIC}</if>
+
+            <if test="beginTime != null">AND t.create_time &gt;= #{beginTime,jdbcType=TIMESTAMP}
+
+            </if>
+            <if test="endTime != null">AND t.create_time &lt;=#{endTime,jdbcType=TIMESTAMP}</if>
+            <if test="needInvoice == true">AND tb.id is not null</if>
+            <if test="needInvoice == false">AND tb.id is null</if>
+
+        </where>
+    </sql>
+    <select id="selectOrderList_count" parameterType="com.ych.shcm.o2o.parameter.QueryOrderListParameter"
+            resultType="long">
+        SELECT COUNT(1)
+        FROM t_order AS t LEFT JOIN t_order_bill_apply AS tb ON t.id = tb.order_id LEFT JOIN t_car as tc ON t.car_id =
+        tc.id
+        LEFT JOIN t_shop AS ts ON t.shop_id = ts.id
+        <include refid="selectOrderListCondition"/>
+    </select>
+    <select id="selectOrderList" parameterType="com.ych.shcm.o2o.parameter.QueryOrderListParameter"
+            resultMap="order">
+        SELECT
+        <include refid="orderPrefixCols">
+            <property name="tableName" value="t"/>
+            <property name="colPrefix" value=""/>
+        </include>
+        ,
+        <include refid="com.ych.shcm.o2o.dao.mybatis.CarMapper.carPrefixCols">
+            <property name="tableName" value="tc"/>
+            <property name="colPrefix" value="tc_"/>
+        </include>
+        ,
+        <include refid="com.ych.shcm.o2o.dao.mybatis.ShopMapper.shopPrefixCols">
+            <property name="tableName" value="ts"/>
+            <property name="colPrefix" value="ts_"/>
+        </include>
+        <if test="needPacks == true">
+            ,
+            <include refid="com.ych.shcm.o2o.dao.mybatis.OrderServicePackMapper.orderServicePackPrefixCols">
+                <property name="tableName" value="tp"/>
+                <property name="colPrefix" value="tp_"/>
+            </include>
+        </if>
+        FROM t_order AS t LEFT JOIN t_order_bill_apply AS tb ON t.id = tb.order_id LEFT JOIN t_car as tc ON t.car_id =
+        tc.id
+        LEFT JOIN t_shop AS ts ON t.shop_id = ts.id
+        <if test="needPacks == true">
+            LEFT JOIN t_order_service_pack AS tp ON t.id = tp.order_id
+        </if>
+        <include refid="selectOrderListCondition"/>
+        ORDER BY t.create_time DESC
+        <!--<choose>-->
+        <!--<when test="sorts != null and sorts.size() > 0">ORDER BY `${sort}`-->
+        <!--<if test="order != null">${order}</if>-->
+        <!--</when>-->
+        <!--<otherwise>-->
+        <!---->
+        <!--</otherwise>-->
+        <!--</choose>-->
+        LIMIT #{startIndex,jdbcType=NUMERIC}, #{pageSize,jdbcType=NUMERIC}
+    </select>
+
+    <select id="selectOrderCountGroupByType" parameterType="map" resultType="com.ych.shcm.o2o.model.OrderStatusCount">
+        select count(1) as `count` ,status from t_order
+        <if test="userId !=null">WHERE user_id = #{userId,jdbcType=NUMERIC}</if>
+        GROUP BY status ORDER BY status
+    </select>
+
+</mapper>

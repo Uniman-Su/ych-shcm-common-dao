@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.ServicePackMapper">
+
+    <!-- 服务包 -->
+    <resultMap id="servicePack" type="com.ych.shcm.o2o.model.ServicePack">
+        <id column="id" property="id" jdbcType="NUMERIC"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="icon_path" property="iconPath" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="NUMERIC"/>
+        <result column="desc" property="desc" jdbcType="VARCHAR"/>
+        <result column="comment" property="comment" jdbcType="VARCHAR"/>
+        <result column="modifier_id" property="modifierId" jdbcType="NUMERIC"/>
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP"/>
+        <result column="alias" property="alias" jdbcType="VARCHAR"/>
+
+    </resultMap>
+
+
+    <!-- 服务包的列 -->
+    <sql id="servicePackCols">
+`id`,
+`name`,
+`icon_path`,
+`status`,
+`desc`,
+`comment`,
+`modifier_id`,
+`modify_time`
+    </sql>
+    <sql id="servicePackPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`name` AS `${colPrefix}name`,
+`${tableName}`.`icon_path` AS `${colPrefix}icon_path`,
+`${tableName}`.`status` AS `${colPrefix}status`,
+`${tableName}`.`desc` AS `${colPrefix}desc`,
+`${tableName}`.`comment` AS `${colPrefix}comment`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+    </sql>
+
+    <!-- 查询服务包详情 -->
+    <select id="selectById" parameterType="decimal" resultMap="servicePack">
+        SELECT
+        <include refid="servicePackCols"/>
+        FROM t_service_pack WHERE id = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 更新服务包 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.ServicePack">
+        UPDATE t_service_pack
+        SET
+        name = #{name,jdbcType=NUMERIC},
+        icon_path = #{iconPath,jdbcType=VARCHAR},
+        status = #{status,jdbcType=VARCHAR},
+        `desc` = #{desc,jdbcType=VARCHAR},
+        comment = #{comment,jdbcType=VARCHAR},
+        modifier_id = #{modifierId,jdbcType=VARCHAR},
+        modify_time = CURRENT_TIME
+        WHERE id = #{id,jdbcType=NUMERIC}
+        AND modify_time = #{modifyTime,jdbcType=TIMESTAMP}
+    </update>
+
+    <!-- 插入服务包 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.ServicePack" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_service_pack (
+`name`,
+`icon_path`,
+`status`,
+`desc`,
+`comment`,
+`modifier_id`,
+`modify_time`
+        ) VALUES (
+#{name,jdbcType=NUMERIC},
+#{iconPath,jdbcType=VARCHAR},
+#{status,jdbcType=VARCHAR},
+#{desc,jdbcType=VARCHAR},
+#{comment,jdbcType=VARCHAR},
+#{modifierId,jdbcType=VARCHAR},
+#{modifyTime,jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <!-- 删除服务包 -->
+    <select id="delete" parameterType="decimal">
+        DELETE
+        FROM t_service_pack WHERE id = #{value,jdbcType=NUMERIC}
+    </select>
+
+
+    <!-- 查询服务包列表 -->
+    <sql id="selectServicePackListCondition">
+        <where>
+            <if test="name != null and name.length() >0">AND t.name = #{name,jdbcType=VARCHAR}</if>
+            <if test="status != null ">AND t.status = #{status,jdbcType=NUMERIC}
+            </if>
+
+        </where>
+    </sql>
+    <select id="selectServicePackList_count" parameterType="com.ych.shcm.o2o.parameter.QueryServicePackListParameter"
+            resultType="long">
+        SELECT COUNT(1)
+        FROM
+        t_service_pack t
+        <include refid="selectServicePackListCondition"/>
+    </select>
+    <select id="selectServicePackList" parameterType="com.ych.shcm.o2o.parameter.QueryServicePackListParameter"
+            resultMap="servicePack">
+        SELECT
+        `id`,
+        `name`,
+        `icon_path`,
+        `status`,
+        `modifier_id`,
+        `modify_time`
+        FROM t_service_pack t
+        <include refid="selectServicePackListCondition"/>
+        <choose>
+            <when test="sort != null and sort.length() > 0">ORDER BY `${sort}`
+                <if test="order != null">${order}</if>
+            </when>
+            <otherwise>
+                ORDER BY id DESC
+            </otherwise>
+        </choose>
+        LIMIT #{startIndex,jdbcType=NUMERIC}, #{pageSize,jdbcType=NUMERIC}
+    </select>
+
+</mapper>

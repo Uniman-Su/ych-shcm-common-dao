@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.OrderAppointmentMapper">
+
+    <!-- 订单预约 -->
+    <resultMap id="orderAppointment" type="com.ych.shcm.o2o.model.OrderAppointment">
+        <id column="id" property="id" jdbcType="NUMERIC"/>
+        <result column="order_id" property="orderId" jdbcType="NUMERIC"/>
+        <result column="appointed_time" property="appointedTime" jdbcType="TIMESTAMP"/>
+        <result column="ptc" property="ptc" jdbcType="VARCHAR"/>
+        <result column="phone" property="phone" jdbcType="VARCHAR"/>
+        <result column="shop_id" property="shopId" jdbcType="NUMERIC"/>
+
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+
+        <association property="order" resultMap="com.ych.shcm.o2o.dao.mybatis.OrderMapper.order" columnPrefix="to_" />
+    </resultMap>
+
+
+    <!-- 订单预约的列 -->
+    <sql id="orderAppointmentCols">
+`id`,
+`order_id`,
+`appointed_time`,
+`ptc`,
+`phone`,
+`shop_id`,
+`create_time`
+    </sql>
+    <sql id="orderAppointmentPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`order_id` AS `${colPrefix}order_id`,
+`${tableName}`.`appointed_time` AS `${colPrefix}appointed_time`,
+`${tableName}`.`ptc` AS `${colPrefix}ptc`,
+`${tableName}`.`phone` AS `${colPrefix}phone`,
+`${tableName}`.`shop_id` AS `${colPrefix}shop_id`,
+`${tableName}`.`create_time` AS `${colPrefix}create_time`
+    </sql>
+
+    <!-- 查询订单预约详情 -->
+    <select id="selectById" parameterType="decimal" resultMap="orderAppointment">
+        SELECT
+        <include refid="orderAppointmentCols"/>
+        FROM t_order_appointment WHERE id = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 更新订单预约 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.OrderAppointment">
+        UPDATE t_order_appointment
+        SET
+        order_id = #{orderId,jdbcType=NUMERIC},
+        appointed_time = #{appointedTime,jdbcType=TIMESTAMP},
+        ptc = #{ptc,jdbcType=VARCHAR},
+        phone = #{phone,jdbcType=VARCHAR},
+        shop_id = #{shopId,jdbcType=NUMERIC},
+        create_time = #{createTime,jdbcType=TIMESTAMP}
+        WHERE id = #{id,jdbcType=NUMERIC}
+    </update>
+
+    <!-- 插入订单预约 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.OrderAppointment" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO t_order_appointment (
+`id`,
+`order_id`,
+`appointed_time`,
+`ptc`,
+`phone`,
+shop_id
+        ) VALUES (
+        #{id,jdbcType=NUMERIC},
+        #{orderId,jdbcType=NUMERIC},
+        #{appointedTime,jdbcType=TIMESTAMP},
+        #{ptc,jdbcType=VARCHAR},
+        #{phone,jdbcType=VARCHAR},
+         #{shopId,jdbcType=NUMERIC}
+        )
+    </insert>
+
+    <!-- 查询订单预约列表条件 -->
+    <sql id="selectOrderAppointmentListCondition">
+        <where>
+            <if test="orderId != null">AND ta.order_id = #{orderId,jdbcType=NUMERIC}</if>
+            <if test="shopId != null">AND ta.shop_id = #{shopId,jdbcType=NUMERIC}</if>
+            <if test="userId != null">AND `to`.user_id = #{userId,jdbcType=NUMERIC}</if>
+        </where>
+    </sql>
+    <select id="selectOrderAppointmentList_count"
+            parameterType="com.ych.shcm.o2o.parameter.QueryOrderAppointmentListParameter"
+            resultType="long">
+        SELECT COUNT(1)
+        FROM t_order_appointment ta
+        <if test="userId != null" >
+            JOIN t_order `to` ON ta.order_id = `to`.id
+        </if>
+        <include refid="selectOrderAppointmentListCondition"/>
+    </select>
+
+    <!-- 查询订单预约列表 -->
+    <select id="selectOrderAppointmentList"
+            parameterType="com.ych.shcm.o2o.parameter.QueryOrderAppointmentListParameter" resultMap="orderAppointment">
+        SELECT
+        <include refid="orderAppointmentPrefixCols">
+            <property name="tableName" value="ta"/>
+            <property name="colPrefix" value=""/>
+        </include>
+        <if test="needOrderInfo" >
+            ,
+            <include refid="com.ych.shcm.o2o.dao.mybatis.OrderMapper.orderPrefixCols">
+            <property name="tableName" value="to"/>
+            <property name="colPrefix" value="to_"/>
+        </include>
+            ,
+            <include refid="com.ych.shcm.o2o.dao.mybatis.OrderServicePackMapper.orderServicePackPrefixCols">
+                <property name="tableName" value="tp"/>
+                <property name="colPrefix" value="to_tp_"/>
+            </include>
+        </if>
+        FROM t_order_appointment ta
+        <if test="needOrderInfo or userId != null" >
+           JOIN t_order `to` ON ta.order_id = `to`.id
+            <if test="needOrderInfo" >
+                JOIN t_order_service_pack  tp ON `to`.id =  tp.order_id
+            </if>
+        </if>
+        <include refid="selectOrderAppointmentListCondition"/>
+        <if test="startIndex != null">LIMIT #{startIndex,jdbcType=NUMERIC}, #{pageSize,jdbcType=NUMERIC}</if>
+    </select>
+
+</mapper>

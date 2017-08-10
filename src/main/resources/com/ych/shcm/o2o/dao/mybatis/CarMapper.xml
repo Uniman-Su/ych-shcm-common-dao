@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.CarMapper">
+
+    <!-- 车辆 -->
+    <resultMap id="car" type="com.ych.shcm.o2o.model.Car">
+        <id column="id" property="id" jdbcType="NUMERIC" />
+        <result column="vin" property="vin" jdbcType="VARCHAR" />
+        <result column="model_id" property="modelId" jdbcType="NUMERIC" />
+        <result column="effect_time" property="effectTime" jdbcType="TIMESTAMP" />
+        <result column="expires" property="expires" jdbcType="TIMESTAMP" />
+        <result column="first_order_id" property="firstOrderId" jdbcType="NUMERIC" />
+        <result column="first_mtime" property="firstMaintenanceTime" jdbcType="TIMESTAMP" />
+        <result column="first_order_status" property="firstOrderStatus" jdbcType="NUMERIC" />
+        <result column="first_mmoney" property="firstMaintenanceMoney" jdbcType="NUMERIC" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <!-- 车辆过期维护信息 -->
+    <resultMap id="expiredMaintenanceInfo" type="com.ych.shcm.o2o.model.CarExpiredMaintenanceInfo" extends="car">
+        <result column="model_id" property="carId" jdbcType="NUMERIC" />
+    </resultMap>
+
+    <!-- 车辆的列 -->
+    <sql id="carCols">
+`id`,
+`vin`,
+`model_id`,
+`effect_time`,
+`expires`,
+`first_order_id`,
+`first_mtime`,
+`first_order_status`,
+`first_mmoney`,
+`create_time`
+    </sql>
+    <sql id="carPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`vin` AS `${colPrefix}vin`,
+`${tableName}`.`model_id` AS `${colPrefix}model_id`,
+`${tableName}`.`effect_time` AS `${colPrefix}effect_time`,
+`${tableName}`.`expires` AS `${colPrefix}expires`,
+`${tableName}`.`first_order_id` AS `${colPrefix}first_order_id`,
+`${tableName}`.`first_mtime` AS `${colPrefix}first_mtime`,
+`${tableName}`.`first_order_status` AS `${colPrefix}first_order_status`,
+`${tableName}`.`first_mmoney` AS `${colPrefix}first_mmoney`,
+`${tableName}`.`create_time` AS `${colPrefix}create_time`
+    </sql>
+
+    <!-- 车辆过期维护信息列 -->
+    <sql id="expiredMaintenanceInfoCols">
+<include refid="carCols" />,
+`car_id`
+    </sql>
+    <sql id="expiredMaintenanceInfoPrefixCols">
+<include refid="carPrefixCols" />,
+`${tableName}`.`model_id` AS `${colPrefix}car_id`
+    </sql>
+
+    <!-- 插入车辆信息 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.Car" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_car (
+`vin`,
+`model_id`,
+`effect_time`,
+`expires`,
+`first_order_id`,
+`first_mtime`,
+`first_order_status`,
+`first_mmoney`
+) VALUES (
+#{vin,jdbcType=VARCHAR},
+#{modelId,jdbcType=NUMERIC},
+#{effectTime,jdbcType=TIMESTAMP},
+#{expires,jdbcType=TIMESTAMP},
+#{firstOrderId,jdbcType=NUMERIC},
+#{firstMaintenanceTime,jdbcType=TIMESTAMP},
+#{firstOrderStatus,jdbcType=NUMERIC},
+#{firstMaintenanceMoney,jdbcType=NUMERIC}
+)
+    </insert>
+
+    <!-- 更新车辆信息 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.Car">
+UPDATE t_car
+   SET `vin` = #{vin,jdbcType=VARCHAR},
+       `model_id` = #{modelId,jdbcType=NUMERIC},
+       `effect_time` = #{effectTime,jdbcType=TIMESTAMP},
+       `expires` = #{expires,jdbcType=TIMESTAMP},
+       `first_order_id` = #{firstOrderId,jdbcType=TIMESTAMP},
+       `first_mtime` = #{firstMaintenanceTime,jdbcType=TIMESTAMP},
+       `first_order_status` = #{firstOrderStatus,jdbcType=NUMERIC},
+       `first_mmoney` = #{firstMaintenanceMoney,jdbcType=NUMERIC}
+ WHERE `id` = #{id,jdbcType=NUMERIC}
+    </update>
+
+    <!-- 根据ID查询车辆信息 -->
+    <select id="selectById" parameterType="decimal" resultMap="car">
+SELECT <include refid="carCols" />
+  FROM t_car
+ WHERE `id` = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 根据VIN码查询车辆信息 -->
+    <select id="selectByVin" parameterType="string" resultMap="car">
+SELECT <include refid="carCols" />
+  FROM t_car
+ WHERE `vin` = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 查询列表 -->
+    <sql id="selectListCondition">
+<where>
+    <if test="brandId != null">tcs.brand_id = #{brandId,jdbcType=NUMERIC}</if>
+    <if test="factoryId != null">AND tcs.factory_id = #{factoryId,jdbcType=NUMERIC}</if>
+    <if test="seriesId != null">AND tcm.series_id = #{seriesId,jdbcType=NUMERIC}</if>
+    <if test="year != null">AND tcm.year = #{year,jdbcType=NUMERIC}</if>
+    <if test="modelId != null">AND tc.model_id = #{modelId,jdbcType=NUMERIC}</if>
+    <if test="vin != null and vin.length() > 0">AND tc.vin = #{vin,jdbcType=VARCHAR}</if>
+    <if test="effectTimeBegin != null">AND tc.effect_time >= #{effectTimeBegin,jdbcType=TIMESTAMP}</if>
+    <if test="effectTimeEnd != null">AND tc.effect_time &lt;= #{effectTimeEnd,jdbcType=TIMESTAMP}</if>
+    <if test="expiresBegin != null">AND tc.expires >= #{expiresBegin,jdbcType=TIMESTAMP}</if>
+    <if test="expiresEnd != null">AND tc.expires &lt;= #{expiresEnd,jdbcType=TIMESTAMP}</if>
+    <if test="firstMaintenanceTimeBegin != null">AND tc.first_mtime >= #{firstMaintenanceTimeBegin,jdbcType=TIMESTAMP}</if>
+    <if test="firstMaintenanceTimeEnd != null">AND tc.first_mtime &lt;= #{firstMaintenanceTimeEnd,jdbcType=TIMESTAMP}</if>
+    <if test="firstOrderStatuses != null and firstOrderStatuses.size() > 0">
+        AND
+        <choose>
+            <when test="firstOrderStatuses.size() == 1">
+    tc.first_order_status = #{firstOrderStatuses[0],jdbcType=NUMERIC}
+            </when>
+            <otherwise>
+    tc.first_order_status IN (<foreach collection="firstOrderStatuses" item="status" separator=",">#{status,jdbcType=NUMERIC}</foreach>)
+            </otherwise>
+        </choose>
+    </if>
+</where>
+    </sql>
+    <select id="selectList" parameterType="com.ych.shcm.o2o.parameter.QueryCarParameter" resultMap="car">
+SELECT <include refid="carPrefixCols">
+           <property name="tableName" value="tc" />
+           <property name="colPrefix" value="" />
+       </include>
+  FROM t_car AS tc
+       <if test="year != null or seriesId != null">JOIN t_car_model AS tcm ON tc.model_id = tcm.id</if>
+       <if test="factoryId != null or brandId != null">JOIN t_car_series AS tcs ON tcs.id = tcm.series_id</if>
+<include refid="selectListCondition" />
+ORDER BY tc.effect_time DESC
+<if test="startIndex != null">LIMIT #{startIndex,jdbcType=NUMERIC}, #{pageSize,jdbcType=NUMERIC}</if>
+    </select>
+    <select id="selectList_count" parameterType="com.ych.shcm.o2o.parameter.QueryCarParameter" resultType="long">
+SELECT COUNT(1)
+  FROM t_car AS tc
+       <if test="year != null or seriesId != null">JOIN t_car_model AS tcm ON tc.model_id = tcm.id</if>
+       <if test="factoryId != null or brandId != null">JOIN t_car_series AS tcs ON tcs.id = tcm.series_id</if>
+<include refid="selectListCondition" />
+    </select>
+
+    <!-- 插入车辆维护信息 -->
+    <insert id="insertExpiredMaintenanceInfo" parameterType="com.ych.shcm.o2o.model.CarExpiredMaintenanceInfo" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_car_expired_minfo (
+`car_id`,
+`vin`,
+`model_id`,
+`effect_time`,
+`expires`,
+`first_order_id`,
+`first_mtime`,
+`first_order_status`,
+`first_mmoney`
+) VALUES (
+#{carId,jdbcType=NUMERIC},
+#{vin,jdbcType=VARCHAR},
+#{modelId,jdbcType=NUMERIC},
+#{effectTime,jdbcType=TIMESTAMP},
+#{expires,jdbcType=TIMESTAMP},
+#{firstOrderId,jdbcType=NUMERIC},
+#{firstMaintenanceTime,jdbcType=TIMESTAMP},
+#{firstOrderStatus,jdbcType=NUMERIC},
+#{firstMaintenanceMoney,jdbcType=NUMERIC}
+)
+    </insert>
+
+    <!-- 根据ID查询车辆过期维护信息 -->
+    <select id="selectExpiredMaintenanceInfoById" parameterType="decimal" resultMap="expiredMaintenanceInfo">
+SELECT <include refid="expiredMaintenanceInfoCols" />
+  FROM t_car_expired_minfo
+ WHERE `id` = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 根据车辆ID和生效时间车辆过期维护信息 -->
+    <select id="selectExpiredMaintenanceInfoByCarIdAndEffectTime" parameterType="map" resultMap="expiredMaintenanceInfo">
+SELECT <include refid="expiredMaintenanceInfoCols" />
+  FROM t_car_expired_minfo
+ WHERE `car_id` = #{carId,jdbcType=NUMERIC}
+   AND `effect_time` = #{effectTime,jdbcType=TIMESTAMP}
+    </select>
+
+    <!-- 查询车辆过期维护信息的列表 -->
+    <sql id="selectExpiredMaintenanceInfoListCondition">
+<where>
+    <if test="brandId != null">tcs.brand_id = #{brandId,jdbcType=NUMERIC}</if>
+    <if test="factoryId != null">AND tcs.factory_id = #{factoryId,jdbcType=NUMERIC}</if>
+    <if test="seriesId != null">AND tcm.series_id = #{seriesId,jdbcType=NUMERIC}</if>
+    <if test="year != null">AND tcm.year = #{year,jdbcType=NUMERIC}</if>
+    <if test="modelId != null">AND tcem.model_id = #{modelId,jdbcType=NUMERIC}</if>
+    <if test="vin != null and vin.length() > 0">AND tcem.vin = #{vin,jdbcType=VARCHAR}</if>
+    <if test="effectTimeBegin != null">AND tcem.effect_time >= #{effectTimeBegin,jdbcType=TIMESTAMP}</if>
+    <if test="effectTimeEnd != null">AND tcem.effect_time &lt;= #{effectTimeEnd,jdbcType=TIMESTAMP}</if>
+    <if test="expiresBegin != null">AND tcem.expires >= #{expiresBegin,jdbcType=TIMESTAMP}</if>
+    <if test="expiresEnd != null">AND tcem.expires &lt;= #{expiresEnd,jdbcType=TIMESTAMP}</if>
+    <if test="firstMaintenanceTimeBegin != null">AND tcem.first_mtime >= #{firstMaintenanceTimeBegin,jdbcType=TIMESTAMP}</if>
+    <if test="firstMaintenanceTimeEnd != null">AND tcem.first_mtime &lt;= #{firstMaintenanceTimeEnd,jdbcType=TIMESTAMP}</if>
+    <if test="firstOrderStatuses != null and firstOrderStatuses.size() > 0">
+        AND
+        <choose>
+            <when test="firstOrderStatuses.size() == 1">
+                tcem.first_order_status = #{firstOrderStatuses[0],jdbcType=NUMERIC}
+            </when>
+            <otherwise>
+                tcem.first_order_status IN (<foreach collection="firstOrderStatuses" item="status" separator=",">#{status,jdbcType=NUMERIC}</foreach>)
+            </otherwise>
+        </choose>
+    </if>
+    <if test="carId != null">AND tcem.car_id = #{carId,jdbcType=NUMERIC}</if>
+</where>
+    </sql>
+    <select id="selectExpiredMaintenanceInfoList" parameterType="com.ych.shcm.o2o.parameter.QueryCarExpiredMaintenanceParameter" resultMap="expiredMaintenanceInfo">
+SELECT <include refid="carPrefixCols">
+           <property name="tableName" value="tcem" />
+           <property name="colPrefix" value="" />
+       </include>
+  FROM t_car_expired_minfo AS tcem
+       <if test="year != null or seriesId != null">JOIN t_car_model AS tcm ON tcem.model_id = tcm.id</if>
+       <if test="factoryId != null or brandId != null">JOIN t_car_series AS tcs ON tcs.id = tcm.series_id</if>
+<include refid="selectExpiredMaintenanceInfoListCondition" />
+ORDER BY tcem.effect_time DESC
+    </select>
+    <select id="selectExpiredMaintenanceInfoList_count" parameterType="com.ych.shcm.o2o.parameter.QueryCarExpiredMaintenanceParameter" resultType="long">
+SELECT COUNT(1)
+  FROM t_car_expired_minfo AS tcem
+       <if test="year != null or seriesId != null">JOIN t_car_model AS tcm ON tcem.model_id = tcm.id</if>
+       <if test="factoryId != null or brandId != null">JOIN t_car_series AS tcs ON tcs.id = tcm.series_id</if>
+<include refid="selectExpiredMaintenanceInfoListCondition" />
+    </select>
+
+    <select id="selectCarsOfUser" parameterType="decimal" resultMap="com.ych.shcm.o2o.dao.mybatis.CarModelMapper.model">
+        SELECT <include refid="com.ych.shcm.o2o.dao.mybatis.CarModelMapper.modelPrefixCols">
+        <property name="tableName" value="t3" />
+        <property name="colPrefix" value="t3_" />
+    </include>
+        t_user t1 LEFT  JOIN  t_user_car t2 on t1.id = t2.user_id LEFT JOIN t_car_model t3 on t2.car_id = t3.id
+    </select>
+
+</mapper>

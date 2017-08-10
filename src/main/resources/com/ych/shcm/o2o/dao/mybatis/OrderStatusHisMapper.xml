@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.OrderStatusHisMapper">
+
+    <!-- 订单状态历史记录 -->
+    <resultMap id="orderStatusHis" type="com.ych.shcm.o2o.model.OrderStatusHis">
+        <id column="id" property="id" jdbcType="NUMERIC"/>
+        <result column="order_id" property="orderId" jdbcType="NUMERIC"/>
+        <result column="old_status" property="oldStatus" jdbcType="NUMERIC"/>
+        <result column="status" property="status" jdbcType="NUMERIC"/>
+        <result column="modifier_id" property="modifierId" jdbcType="NUMERIC"/>
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+
+    <!-- 订单状态历史记录的列 -->
+    <sql id="orderStatusHisCols">
+`id`,
+`order_id`,
+`old_status`,
+`status`,
+`modifier_id`,
+`modify_time`
+    </sql>
+    <sql id="orderStatusHisPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`order_id` AS `${colPrefix}order_id`,
+`${tableName}`.`old_status` AS `${colPrefix}old_status`,
+`${tableName}`.`status` AS `${colPrefix}status`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+    </sql>
+
+    <!-- 查询订单状态历史记录详情 -->
+    <select id="selectById" parameterType="decimal" resultMap="orderStatusHis">
+        SELECT
+        <include refid="orderStatusHisCols"/>
+        FROM t_order_status_his WHERE id = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 更新订单状态历史记录 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.OrderStatusHis">
+        UPDATE t_order_status_his
+        SET
+        order_id = #{orderId,jdbcType=NUMERIC},
+        old_status = #{oldStatus,jdbcType=NUMERIC},
+        status = #{status,jdbcType=NUMERIC},
+        modifier_id = #{modifierId,jdbcType=NUMERIC},
+        modify_time = #{modifyTime,jdbcType=TIMESTAMP}
+        WHERE id = #{id,jdbcType=NUMERIC}
+    </update>
+
+    <!-- 插入订单状态历史记录 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.OrderStatusHis" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_order_status_his (
+`order_id`,
+`old_status`,
+`status`<if test="modifierId">,
+`modifier_id`</if><if test="modifyTime != null">,
+`modify_time`</if>
+) VALUES (
+#{orderId,jdbcType=NUMERIC},
+#{oldStatus,jdbcType=NUMERIC},
+#{status,jdbcType=NUMERIC}<if test="modifierId">,
+#{modifierId,jdbcType=NUMERIC}</if><if test="modifyTime != null">,
+#{modifyTime,jdbcType=TIMESTAMP}</if>
+)
+    </insert>
+
+    <!-- 删除订单状态历史记录 -->
+    <select id="delete" parameterType="decimal">
+DELETE FROM t_order_status_his WHERE id = #{value,jdbcType=NUMERIC}
+    </select>
+
+
+    <!-- 查询订单状态历史记录详情 -->
+    <select id="selectByOrderId" parameterType="decimal" resultMap="orderStatusHis">
+        SELECT
+        <include refid="orderStatusHisCols"/>
+        FROM t_order_status_his WHERE order_id = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 查询最近的变更记录 -->
+    <select id="selectLatest" parameterType="map" resultMap="orderStatusHis">
+SELECT <include refid="orderStatusHisCols"/>
+  FROM t_order_status_his
+ WHERE order_id = #{orderId,jdbcType=NUMERIC}
+   <if test="status != null">AND status = #{status,jdbcType=NUMERIC}</if>
+ORDER BY modify_time DESC
+LIMIT 0, 1
+    </select>
+
+</mapper>

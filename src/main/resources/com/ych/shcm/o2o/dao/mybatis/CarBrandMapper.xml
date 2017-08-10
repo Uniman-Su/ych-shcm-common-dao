@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.CarBrandMapper">
+  
+  <!-- 车型品牌 -->
+  <resultMap type="com.ych.shcm.o2o.model.CarBrand" id="carBrand">
+    <id column="id" property="id" jdbcType="NUMERIC"/>
+    <result column="name" property="name" jdbcType="VARCHAR"/>
+    <result column="logo_path" property="logoPath" jdbcType="VARCHAR"/>
+    <result column="first_char" property="firstChar" jdbcType="CHAR"/>
+    <result column="enabled" property="enabled" jdbcType="NUMERIC"/>
+    <result column="modifier_id" property="modifierId" jdbcType="NUMERIC"/>
+    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP"/>
+  </resultMap>
+  
+  <!-- 车型品牌的列 -->
+  <sql id="carBrandCols">
+`id`,
+`name`,
+`logo_path`,
+`first_char`,
+`enabled`,
+`modifier_id`,
+`modify_time`
+  </sql>
+  <sql id="carBrandPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`name` AS `${colPrefix}name`,
+`${tableName}`.`logo_path` AS `${colPrefix}logo_path`,
+`${tableName}`.`first_char` AS `${colPrefix}first_char`,
+`${tableName}`.`enabled` AS `${colPrefix}enabled`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+  </sql>
+  
+  <!-- 根据ID查询车型品牌 -->
+  <select id="selectById" parameterType="map" resultMap="carBrand">
+SELECT <include refid="carBrandCols" />
+  FROM t_car_brand
+ WHERE id = #{id,jdbcType=NUMERIC}
+<if test="lock == true">FOR UPDATE</if>
+  </select>
+  
+  <!-- 插入数据车型品牌 -->
+  <insert id="insert" parameterType="com.ych.shcm.o2o.model.CarBrand" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_car_brand (
+`name`,
+`logo_path`,
+`first_char`,
+`enabled`,
+`modifier_id`
+) VALUES (
+#{name,jdbcType=VARCHAR},
+#{logoPath,jdbcType=VARCHAR},
+#{firstChar,jdbcType=CHAR},
+#{enabled,jdbcType=NUMERIC},
+#{modifierId,jdbcType=NUMERIC}
+)
+  </insert>
+  
+  <!-- 批量插入车型品牌 -->
+  <insert id="batchInsert" parameterType="list">
+INSERT INTO t_car_brand (
+`name`,
+`logo_path`,
+`first_char`,
+`enabled`,
+`modifier_id`
+) VALUES <foreach collection="list" item="brand" separator=",">(
+#{brand.name,jdbcType=VARCHAR},
+#{brand.logoPath,jdbcType=VARCHAR},
+#{brand.firstChar,jdbcType=CHAR},
+#{brand.enabled,jdbcType=NUMERIC},
+#{brand.modifierId,jdbcType=NUMERIC}
+)</foreach>
+  </insert>
+  
+  <!-- 导入车型品牌,导入跟添加不同的是导入认为数据已存在ID -->
+  <insert id="import" parameterType="list">
+INSERT INTO t_car_brand (
+`id`,
+`name`,
+`logo_path`,
+`first_char`,
+`enabled`,
+`modifier_id`
+) VALUES <foreach collection="list" item="brand" separator=",">(
+#{brand.id,jdbcType=NUMERIC},
+#{brand.name,jdbcType=VARCHAR},
+#{brand.logoPath,jdbcType=VARCHAR},
+#{brand.firstChar,jdbcType=CHAR},
+#{brand.enabled,jdbcType=NUMERIC},
+#{brand.modifierId,jdbcType=NUMERIC}
+)</foreach>
+ON DUPLICATE KEY UPDATE
+  name = VALUES(name),
+  first_char = VALUES(first_char),
+  modifier_id = VALUES(modifier_id)
+  </insert>
+  
+  <!-- 更新车型品牌 -->
+  <update id="update" parameterType="com.ych.shcm.o2o.model.CarBrand">
+UPDATE t_car_brand
+   SET name = #{name,jdbcType=VARCHAR},
+       logo_path = #{logoPath,jdbcType=VARCHAR},
+       first_char = #{firstChar,jdbcType=CHAR},
+       enabled = #{enabled,jdbcType=NUMERIC},
+       modifier_id = #{modifierId,jdbcType=NUMERIC},
+       modify_time = CURRENT_TIMESTAMP
+ WHERE id = #{id,jdbcType=NUMERIC}
+  </update>
+  
+  <!-- 根据ID删除车型品牌 -->
+  <delete id="deleteById" parameterType="decimal">
+DELETE FROM t_car_brand WHERE id = #{value,jdbcType=NUMERIC}
+  </delete>
+  
+  <!-- 查询车型品牌列表 -->
+  <sql id="selectListCondition">
+<where>
+  <if test="name != null and name.length() > 0">name LIKE CONCAT('%', #{name,jdbcType=VARCHAR}, '%')</if>
+  <if test="firstChar != null and firstChar.length > 0">AND first_char = #{firstChar,jdbcType=CHAR}</if>
+  <if test="enabled != null">AND enabled = #{enabled,jdbcType=NUMERIC}</if>
+</where>
+  </sql>
+  <select id="selectList" parameterType="com.ych.shcm.o2o.parameter.QueryCarBrandListParameter" resultMap="carBrand">
+SELECT <include refid="carBrandCols" />
+  FROM t_car_brand
+<include refid="selectListCondition" />
+<if test="sorts != null and sorts.size() > 0">ORDER BY <foreach collection="sorts" separator="," item="sort">${sort.sort}<if test="sort.order != null"> ${sort.order}</if></foreach></if>
+<if test="startIndex != null">LIMIT #{startIndex,jdbcType=NUMERIC}, #{pageSize,jdbcType=NUMERIC}</if>
+  </select>
+  <select id="selectList_count" parameterType="com.ych.shcm.o2o.parameter.QueryCarBrandListParameter" resultType="long">
+SELECT COUNT(1)
+  FROM t_car_brand
+<include refid="selectListCondition" />
+  </select>
+  
+</mapper>

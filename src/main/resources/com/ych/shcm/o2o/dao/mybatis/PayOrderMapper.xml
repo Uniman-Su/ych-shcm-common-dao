@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.PayOrderMapper">
+
+    <!-- 支付单据 -->
+    <resultMap id="payOrder" type="com.ych.shcm.o2o.model.PayOrder">
+        <id column="id" property="id" jdbcType="NUMERIC" />
+        <result column="flow_no" property="flowNo" jdbcType="VARCHAR" />
+        <result column="pay_channel" property="payChannel" jdbcType="NUMERIC" />
+        <result column="pay_channel_flow_no" property="payChannelFlowNo" jdbcType="VARCHAR" />
+        <result column="price" property="price" jdbcType="NUMERIC" />
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="status" property="status" jdbcType="NUMERIC" />
+        <result column="channel_fee" property="channelFee" jdbcType="NUMERIC" />
+        <result column="channel_fee_refundable" property="channelFeeRefundable" jdbcType="NUMERIC" />
+        <result column="prepay_id" property="prepayId" jdbcType="VARCHAR" />
+        <result column="result_code" property="resultCode" jdbcType="VARCHAR" />
+        <result column="result_msg" property="resultMsg" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <!-- 状态变更历史 -->
+    <resultMap id="statusHistory" type="com.ych.shcm.o2o.model.PayOrderStatusHistory">
+        <id column="id" property="id" jdbcType="NUMERIC" />
+        <result column="pay_order_id" property="payOrderId" jdbcType="NUMERIC" />
+        <result column="old_status" property="oldStatus" jdbcType="NUMERIC" />
+        <result column="status" property="status" jdbcType="NUMERIC" />
+        <result column="change_time" property="changeTime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <!-- 支付单据关联的订单 -->
+    <resultMap id="payOrderOrder" type="com.ych.shcm.o2o.model.PayOrderOrder">
+        <id column="id" property="id" jdbcType="NUMERIC" />
+        <result column="pay_order_id" property="payOrderId" jdbcType="NUMERIC" />
+        <result column="order_id" property="orderId" jdbcType="NUMERIC" />
+        <result column="channel_fee" property="channelFee" jdbcType="NUMERIC" />
+        <association property="payOrder" resultMap="com.ych.shcm.o2o.dao.mybatis.PayOrderMapper.payOrder" columnPrefix="tpo_" />
+        <association property="order" resultMap="com.ych.shcm.o2o.dao.mybatis.PayOrderMapper.payOrder" columnPrefix="to_" />
+    </resultMap>
+
+    <!-- 支付单据列 -->
+    <sql id="payOrderCols">
+`id`,
+`flow_no`,
+`pay_channel`,
+`pay_channel_flow_no`,
+`price`,
+`create_time`,
+`status`,
+`channel_fee`,
+`channel_fee_refundable`,
+`prepay_id`,
+`result_code`,
+`result_msg`
+    </sql>
+    <sql id="payOrderPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`flow_no` AS `${colPrefix}flow_no`,
+`${tableName}`.`pay_channel` AS `${colPrefix}pay_channel`,
+`${tableName}`.`pay_channel_flow_no` AS `${colPrefix}pay_channel_flow_no`,
+`${tableName}`.`price` AS `${colPrefix}price`,
+`${tableName}`.`create_time` AS `${colPrefix}create_time`,
+`${tableName}`.`status` AS `${colPrefix}status`,
+`${tableName}`.`channel_fee` AS `${colPrefix}channel_fee`,
+`${tableName}`.`channel_fee_refundable` AS `${colPrefix}channel_fee_refundable`,
+`${tableName}`.`prepay_id` AS `${colPrefix}prepay_id`,
+`${tableName}`.`result_code` AS `${colPrefix}result_code`,
+`${tableName}`.`result_msg` AS `${colPrefix}result_msg`
+    </sql>
+
+    <!-- 状态历史列 -->
+    <sql id="statusHistoryCols">
+`id`,
+`pay_order_id`,
+`old_status`,
+`status`,
+`change_time`
+    </sql>
+    <sql id="statusHistoryPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`pay_order_id` AS `${colPrefix}pay_order_id`,
+`${tableName}`.`old_status` AS `${colPrefix}old_status`,
+`${tableName}`.`status` AS `${colPrefix}status`,
+`${tableName}`.`change_time` AS `${colPrefix}change_time`
+    </sql>
+
+    <!-- 支付单的订单列 -->
+    <sql id="payOrderOrderCols">
+`id`,
+`pay_order_id`,
+`order_id`,
+`channel_fee`
+    </sql>
+    <sql id="payOrderOrderPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`pay_order_id` AS `${colPrefix}pay_order_id`,
+`${tableName}`.`order_id` AS `${colPrefix}order_id`,
+`${tableName}`.`channel_fee` AS `${colPrefix}channel_fee`
+    </sql>
+
+    <!-- 插入支付单 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.PayOrder" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_pay_order(
+`flow_no`,
+`pay_channel`,
+`pay_channel_flow_no`,
+`price`,
+`status`,
+`channel_fee`,
+`channel_fee_refundable`,
+`prepay_id`,
+`result_code`,
+`result_msg`
+) VALUES (
+#{flowNo,jdbcType=VARCHAR},
+#{payChannel,jdbcType=NUMERIC},
+#{payChannelFlowNo,jdbcType=VARCHAR},
+#{price,jdbcType=NUMERIC},
+#{status,jdbcType=NUMERIC},
+#{channelFee,jdbcType=NUMERIC},
+#{channelFeeRefundable,jdbcType=NUMERIC},
+#{prepayId,jdbcType=VARCHAR},
+#{resultCode,jdbcType=VARCHAR},
+#{resultMsg,jdbcType=VARCHAR}
+)
+    </insert>
+
+    <!-- 更新支付单据 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.PayOrder">
+UPDATE t_pay_order
+   SET `flow_no` = #{flowNo,jdbcType=VARCHAR},
+       `pay_channel` = #{payChannel,jdbcType=NUMERIC},
+       `pay_channel_flow_no` = #{payChannelFlowNo,jdbcType=VARCHAR},
+       `price` = #{price,jdbcType=NUMERIC},
+       `status` = #{status,jdbcType=NUMERIC},
+       `channel_fee` = #{channelFee,jdbcType=NUMERIC},
+       `channel_fee_refundable` = #{channelFeeRefundable,jdbcType=NUMERIC},
+       `prepay_id` = #{prepayId,jdbcType=VARCHAR},
+       `result_code` = #{resultCode,jdbcType=VARCHAR},
+       `result_msg` = #{resultMsg,jdbcType=VARCHAR}
+ WHERE `id` = #{id,jdbcType=NUMERIC}
+    </update>
+
+    <!-- 根据ID查找支付单据 -->
+    <select id="selectById" parameterType="decimal" resultMap="payOrder">
+SELECT <include refid="payOrderCols" />
+  FROM t_pay_order
+ WHERE `id` = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 根据流水号查找支付单据 -->
+    <select id="selectByFlowNo" parameterType="string" resultMap="payOrder">
+SELECT <include refid="payOrderCols" />
+  FROM t_pay_order
+ WHERE `flow_no` = #{value,jdbcType=VARCHAR}
+    </select>
+
+    <!-- 根据ID查找支付单据 -->
+    <select id="selectByChannelFlowNo" parameterType="string" resultMap="payOrder">
+SELECT <include refid="payOrderCols" />
+  FROM t_pay_order
+ WHERE `pay_channel_flow_no` = #{value,jdbcType=VARCHAR}
+    </select>
+
+    <!-- 根据订单ID查找未支付的支付单 -->
+    <select id="selectUnpayedByOrderId" parameterType="decimal" resultMap="payOrder">
+SELECT <include refid="payOrderCols" />
+  FROM t_pay_order AS t
+ WHERE t.`status` = 0
+   AND EXISTS (
+    SELECT 1
+      FROM t_pay_order_order
+     WHERE pay_order_id = t.id
+       AND order_id = #{value,jdbcType=NUMERIC}
+)
+    </select>
+
+    <!-- 插入变更历史 -->
+    <insert id="insertStatusHistory" parameterType="com.ych.shcm.o2o.model.PayOrderStatusHistory" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_pay_order_status_his(
+`pay_order_id`,
+`old_status`,
+`status`,
+`change_time`
+) VALUES (
+#{payOrderId,jdbcType=NUMERIC},
+#{oldStatus,jdbcType=NUMERIC},
+#{status,jdbcType=NUMERIC},
+#{changeTime,jdbcType=TIMESTAMP}
+)
+    </insert>
+
+    <!-- 插入支付单订单 -->
+    <insert id="insertOrder" parameterType="collection">
+INSERT INTO t_pay_order_order (
+`pay_order_id`,
+`order_id`,
+`channel_fee`
+) VALUES <foreach collection="collection" separator="," item="order">(
+#{order.payOrderId,jdbcType=NUMERIC},
+#{order.orderId,jdbcType=NUMERIC},
+#{order.channelFee,jdbcType=NUMERIC}
+)
+</foreach>
+    </insert>
+
+    <!-- 根据支付单ID查询支付单所属订单 -->
+    <select id="selectOrderByPayOrderId" parameterType="decimal" resultMap="payOrderOrder">
+SELECT <include refid="payOrderOrderCols" />
+  FROM t_pay_order_order
+ WHERE `pay_order_id` = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 根据订单ID查找支付单订单 -->
+    <select id="selectOrderByOrderId" parameterType="map" resultMap="payOrderOrder">
+SELECT <include refid="payOrderOrderCols" />
+  FROM t_pay_order_order
+ WHERE `pay_order_id` = #{payOrderId,jdbcType=NUMERIC}
+   AND `order_id` = #{orderId,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 根据订单ID查支付的支付单 -->
+    <select id="selectPayedByOrderId" parameterType="decimal" resultMap="payOrder">
+SELECT <include refid="payOrderCols" />
+  FROM t_pay_order AS t
+ WHERE t.`status` = 1
+   AND EXISTS (
+    SELECT 1
+      FROM t_pay_order_order
+     WHERE pay_order_id = t.id
+       AND order_id = #{value,jdbcType=NUMERIC}
+ )
+    </select>
+
+</mapper>

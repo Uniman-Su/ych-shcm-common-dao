@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.OrderServicePackItemMapper">
+
+    <!-- 订单服务包项目 -->
+    <resultMap id="orderServicePackItem" type="com.ych.shcm.o2o.model.OrderServicePackItem">
+        <id column="id" property="id" jdbcType="NUMERIC"/>
+        <result column="order_service_pack_id" property="orderServicePackId" jdbcType="NUMERIC"/>
+        <result column="service_item_id" property="serviceItemId" jdbcType="NUMERIC"/>
+        <result column="num" property="num" jdbcType="NUMERIC"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="icon_path" property="iconPath" jdbcType="VARCHAR"/>
+        <result column="price" property="price" jdbcType="NUMERIC"/>
+    </resultMap>
+
+
+    <!-- 订单服务包项目的列 -->
+    <sql id="orderServicePackItemCols">
+`id`,
+`order_service_pack_id`,
+`service_item_id`,
+`num`,
+`name`,
+`icon_path`,
+`price`
+    </sql>
+    <sql id="orderServicePackItemPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`order_service_pack_id` AS `${colPrefix}order_service_pack_id`,
+`${tableName}`.`service_item_id` AS `${colPrefix}service_item_id`,
+`${tableName}`.`num` AS `${colPrefix}num`,
+`${tableName}`.`name` AS `${colPrefix}name`,
+`${tableName}`.`icon_path` AS `${colPrefix}icon_path`,
+`${tableName}`.`price` AS `${colPrefix}price`
+    </sql>
+
+    <!-- 查询订单服务包项目详情 -->
+    <select id="selectById" parameterType="decimal" resultMap="orderServicePackItem">
+        SELECT
+        <include refid="orderServicePackItemCols"/>
+        FROM t_order_service_pack_item WHERE id = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 更新订单服务包项目 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.OrderServicePackItem">
+        UPDATE t_order_service_pack_item
+        SET
+        order_service_pack_id = #{orderServicePackId,jdbcType=NUMERIC},
+        service_item_id = #{serviceItemId,jdbcType=NUMERIC},
+        name = #{name,jdbcType=VARCHAR},
+        num = #{num,jdbcType=NUMERIC},
+        icon_path = #{iconPath,jdbcType=VARCHAR},
+        price = #{price,jdbcType=NUMERIC}
+        WHERE id = #{id,jdbcType=NUMERIC}
+    </update>
+
+    <!-- 插入订单服务包项目 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.OrderServicePackItem" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO t_order_service_pack_item (
+`order_service_pack_id`,
+`service_item_id`,
+`name`,
+`num`,
+`icon_path`,
+`price`
+        ) VALUES (
+        #{orderServicePackId,jdbcType=NUMERIC},
+        #{serviceItemId,jdbcType=NUMERIC},
+        #{name,jdbcType=VARCHAR},
+        #{num,jdbcType=NUMERIC},
+        #{iconPath,jdbcType=VARCHAR},
+        #{price,jdbcType=NUMERIC}
+        )
+    </insert>
+
+    <!-- 插入订单服务包项目 -->
+    <insert id="insertList" parameterType="collection" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO t_order_service_pack_item (
+        `id`,
+        `order_service_pack_id`,
+        `service_item_id`,
+        `name`,
+        `num`,
+        `icon_path`,
+        `price`
+        ) VALUES
+        <foreach collection="collection" item="item" separator=",">
+            (
+            #{id,jdbcType=NUMERIC},
+            #{orderServicePackId,jdbcType=NUMERIC},
+            #{serviceItemId,jdbcType=NUMERIC},
+            #{name,jdbcType=VARCHAR},
+            #{num,jdbcType=NUMERIC},
+            #{iconPath,jdbcType=VARCHAR},
+            #{price,jdbcType=NUMERIC}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 删除订单服务包项目 -->
+    <select id="delete" parameterType="decimal">
+        DELETE
+        FROM t_order_service_pack_item WHERE id = #{value,jdbcType=NUMERIC}
+    </select>
+
+
+    <!-- 查询订单服务包项目详情 -->
+    <select id="selectByOrderServicePackId" parameterType="decimal" resultMap="orderServicePackItem">
+        SELECT
+        <include refid="orderServicePackItemCols"/>
+        FROM t_order_service_pack_item WHERE order_service_pack_id = #{value,jdbcType=NUMERIC}
+    </select>
+
+</mapper>

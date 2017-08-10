@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.ServicePackItemMapper">
+
+    <!-- 服务包项目 -->
+    <resultMap id="servicePackItem" type="com.ych.shcm.o2o.model.ServicePackItem">
+        <id column="id" property="id" jdbcType="NUMERIC"/>
+        <result column="pack_id" property="packId" jdbcType="NUMERIC"/>
+        <result column="item_id" property="itemId" jdbcType="NUMERIC"/>
+        <result column="sort" property="sort" jdbcType="VARCHAR"/>
+        <result column="modifier_id" property="modifierId" jdbcType="NUMERIC"/>
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP"/>
+
+    </resultMap>
+
+
+    <!-- 服务包项目的列 -->
+    <sql id="servicePackItemCols">
+`id`,
+`pack_id`,
+`item_id`,
+`sort`,
+`modifier_id`,
+`modify_time`
+    </sql>
+    <sql id="servicePackItemPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`pack_id` AS `${colPrefix}pack_id`,
+`${tableName}`.`item_id` AS `${colPrefix}item_id`,
+`${tableName}`.`sort` AS `${colPrefix}sort`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+    </sql>
+
+    <!-- 查询服务包项目详情 -->
+    <select id="selectById" parameterType="decimal" resultMap="servicePackItem">
+        SELECT
+        <include refid="servicePackItemCols"/>
+        FROM t_service_pack_item WHERE id = #{value,jdbcType=NUMERIC}
+    </select>
+
+    <!-- 更新服务包项目 -->
+    <update id="update" parameterType="com.ych.shcm.o2o.model.ServicePackItem">
+        UPDATE t_service_pack_item
+        SET
+        name = #{name,jdbcType=NUMERIC},
+        pack_id = #{pack_id,jdbcType=NUMERIC},
+        item_id = #{item_id,jdbcType=VARCHAR},
+        sort = #{sort,jdbcType=VARCHAR},
+        modifier_id = #{modifierId,jdbcType=VARCHAR},
+        modify_time = CURRENT_TIME
+        WHERE id = #{id,jdbcType=NUMERIC} AND modify_time = #{modifyTime,jdbcType=TIMESTAMP}
+    </update>
+
+    <!-- 插入服务包项目 -->
+    <insert id="insert" parameterType="com.ych.shcm.o2o.model.ServicePackItem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_service_pack_item (
+`pack_id`,
+`item_id`,
+`sort`,
+`modifier_id`,
+`modify_time`
+        ) VALUES (
+#{packId,jdbcType=NUMERIC},
+#{itemId,jdbcType=VARCHAR},
+#{sort,jdbcType=VARCHAR},
+#{modifierId,jdbcType=VARCHAR},
+#{modifyTime,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <!-- 插入服务包项目 -->
+    <insert id="insertList" parameterType="map" >
+        INSERT INTO t_service_pack_item (
+        `pack_id`,
+        `item_id`,
+        `sort`
+        )   VALUES <foreach collection="list" item="item" separator=",">(
+        #{packId,jdbcType=NUMERIC},
+        #{item.id,jdbcType=VARCHAR},
+        #{item.sort,jdbcType=VARCHAR}
+        )</foreach>
+    </insert>
+
+    <select id="selectServiceItemsByPackId" parameterType="decimal" resultMap="servicePackItem">
+
+        SELECT * FROM  t_service_pack_item t1 LEFT JOIN t_service_item  t2 ON t1.item_id =  t2.id where t1.pack_id = #{value,jdbcType=NUMERIC}
+
+    </select>
+
+    <!-- 删除服务包项目 -->
+    <select id="delete" parameterType="decimal">
+        DELETE
+        FROM t_service_pack_item WHERE id = #{value,jdbcType=NUMERIC}
+    </select>
+
+</mapper>

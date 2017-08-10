@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.CarModelMapper">
+  
+  <!-- 车型 -->
+  <resultMap type="com.ych.shcm.o2o.model.CarModel" id="model">
+    <id column="id" property="id" jdbcType="NUMERIC"/>
+    <result column="series_id" property="seriesId" jdbcType="NUMERIC"/>
+    <result column="year" property="year" jdbcType="NUMERIC"/>
+    <result column="name" property="name" jdbcType="VARCHAR"/>
+    <result column="sort" property="sort" jdbcType="NUMERIC"/>
+    <result column="engine_oil_capacity" property="engineOilCapacity" jdbcType="NUMERIC"/>
+    <result column="enabled" property="enabled" jdbcType="NUMERIC"/>
+    <result column="modifier_id" property="modifierId" jdbcType="NUMERIC"/>
+    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP"/>
+  </resultMap>
+  
+  <!-- 车型的列 -->
+  <sql id="modelCols">
+`id`,
+`series_id`,
+`year`,
+`name`,
+`sort`,
+`engine_oil_capacity`,
+`enabled`,
+`modifier_id`,
+`modify_time`
+  </sql>
+  <sql id="modelPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`series_id` AS `${colPrefix}series_id`,
+`${tableName}`.`year` AS `${colPrefix}year`,
+`${tableName}`.`name` AS `${colPrefix}name`,
+`${tableName}`.`sort` AS `${colPrefix}sort`,
+`${tableName}`.`engine_oil_capacity` AS `${colPrefix}engine_oil_capacity`,
+`${tableName}`.`enabled` AS `${colPrefix}enabled`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+  </sql>
+  
+  <!-- 根据ID查询车型 -->
+  <select id="selectById" parameterType="map" resultMap="model">
+SELECT <include refid="modelCols" />
+  FROM t_car_model
+ WHERE id = #{id,jdbcType=NUMERIC}
+<if test="lock == true">FOR UPDATE</if>
+  </select>
+  
+  <!-- 插入车型 -->
+  <insert id="insert" parameterType="com.ych.shcm.o2o.model.CarModel" useGeneratedKeys="true" keyProperty="id">
+INSERT INTO t_car_model (
+`series_id`,
+`year`,
+`name`,
+`sort`,
+`engine_oil_capacity`,
+`enabled`,
+`modifier_id`
+) VALUES (
+#{seriesId,jdbcType=NUMERIC},
+#{year,jdbcType=NUMERIC},
+#{name,jdbcType=VARCHAR},
+#{sort,jdbcType=NUMERIC},
+#{engineOilCapacity,jdbcType=NUMERIC},
+#{enabled,jdbcType=NUMERIC},
+#{modifierId,jdbcType=NUMERIC}
+)
+  </insert>
+  
+  <!-- 批量插入车型 -->
+  <insert id="batchInsert" parameterType="list">
+INSERT INTO t_car_model (
+`series_id`,
+`year`,
+`name`,
+`sort`,
+`engine_oil_capacity`,
+`enabled`,
+`modifier_id`
+) VALUES <foreach collection="list" item="model" separator=",">(
+#{model.seriesId,jdbcType=NUMERIC},
+#{model.year,jdbcType=NUMERIC},
+#{model.name,jdbcType=VARCHAR},
+#{model.sort,jdbcType=NUMERIC},
+#{model.engineOilCapacity,jdbcType=NUMERIC},
+#{model.enabled,jdbcType=NUMERIC},
+#{model.modifierId,jdbcType=NUMERIC}
+)</foreach>
+  </insert>
+  
+  <!-- 导入车型,导入与插入不同的是导入认为数据已经存在ID -->
+  <insert id="import" parameterType="list">
+INSERT INTO t_car_model (
+`id`,
+`series_id`,
+`year`,
+`name`,
+`sort`,
+`engine_oil_capacity`,
+`enabled`,
+`modifier_id`
+) VALUES <foreach collection="list" item="model" separator=",">(
+#{model.id,jdbcType=NUMERIC},
+#{model.seriesId,jdbcType=NUMERIC},
+#{model.year,jdbcType=NUMERIC},
+#{model.name,jdbcType=VARCHAR},
+#{model.sort,jdbcType=NUMERIC},
+#{model.engineOilCapacity,jdbcType=NUMERIC},
+#{model.enabled,jdbcType=NUMERIC},
+#{model.modifierId,jdbcType=NUMERIC}
+)</foreach>
+ON DUPLICATE KEY UPDATE
+  name = VALUES(name),
+  sort = VALUES(SORT),
+  modifier_id = VALUES(modifier_id)
+  </insert>
+  
+  <!-- 更新车型 -->
+  <update id="update" parameterType="com.ych.shcm.o2o.model.CarModel">
+UPDATE t_car_model
+   SET `series_id` = #{seriesId,jdbcType=NUMERIC},
+       `year` = #{year,jdbcType=NUMERIC},
+       `name` = #{name,jdbcType=VARCHAR},
+       `sort` = #{sort,jdbcType=NUMERIC},
+       `engine_oil_capacity` = #{engineOilCapacity,jdbcType=NUMERIC},
+       `enabled` = #{enabled,jdbcType=NUMERIC},
+       `modifier_id` = #{modifierId,jdbcType=NUMERIC},
+       `modify_time` = #{modifyTime,jdbcType=TIMESTAMP}
+ WHERE `id` = #{id,jdbcType=NUMERIC}
+  </update>
+  
+  <!-- 根据ID删除车型 -->
+  <delete id="deleteById" parameterType="decimal">
+DELETE FROM t_car_model WHERE `id` = #{value,jdbcType=NUMERIC}
+  </delete>
+  
+  <!-- 根据车系年份查询车型列表 -->
+  <select id="selectBySeriesYear" parameterType="map" resultMap="model">
+SELECT <include refid="modelCols" />
+  FROM t_car_model
+ WHERE `series_id` = #{seriesId,jdbcType=NUMERIC}
+   AND `year` = #{year,jdbcType=NUMERIC}
+   AND `enabled` = 1
+ORDER BY `sort` ASC
+<if test="lock == true">FOR UPDATE</if>
+  </select>
+
+</mapper>

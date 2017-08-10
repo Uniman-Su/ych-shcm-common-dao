@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ych.shcm.o2o.dao.mybatis.ShopCarBrandMapper">
+
+    <!-- 店铺车型品牌 -->
+    <resultMap id="carBrand" type="com.ych.shcm.o2o.model.ShopCarBrand">
+        <id column="id" property="id" jdbcType="NUMERIC" />
+        <result column="shop_id" property="shopId" jdbcType="NUMERIC" />
+        <result column="brand_id" property="brandId" jdbcType="NUMERIC" />
+        <result column="modifier_id" property="modifierId" jdbcType="NUMERIC" />
+        <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+        <association property="carBrand" resultMap="com.ych.shcm.o2o.dao.mybatis.CarBrandMapper.carBrand" columnPrefix="tcb_" />
+    </resultMap>
+
+    <!-- 车型品牌列 -->
+    <sql id="carBrandCols">
+`id`,
+`shop_id`,
+`brand_id`,
+`modifier_id`,
+`modify_time`
+    </sql>
+    <sql id="carBrandPrefixCols">
+`${tableName}`.`id` AS `${colPrefix}id`,
+`${tableName}`.`shop_id` AS `${colPrefix}shop_id`,
+`${tableName}`.`brand_id` AS `${colPrefix}brand_id`,
+`${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+`${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+    </sql>
+
+    <!-- 插入车型品牌 -->
+    <insert id="batchInsert" parameterType="collection">
+INSERT INTO t_shop_car_brand (
+`shop_id`,
+`brand_id`,
+`modifier_id`
+) VALUES <foreach collection="collection" item="carBrand" separator=",">(
+#{shopId,jdbcType=NUMERIC},
+#{brandId,jdbcType=NUMERIC},
+#{modifierId,jdbcType=NUMERIC}
+)</foreach>
+ON DUPLICATE KEY UPDATE
+    modifier_id = VALUES(modifier_id),
+    modify_time = CURRENT_TIMESTAMP
+    </insert>
+
+    <!-- 根据ID删除记录 -->
+    <delete id="deleteById" parameterType="collection">
+DELETE FROM t_shop_car_brand
+WHERE <choose>
+          <when test="collection.size() == 1">`id` = #{collection[0],jdbcType=NUMERIC}</when>
+          <otherwise>`id` IN (<foreach collection="collection" separator="," item="id">#{id,jdbcType=NUMERIC}</foreach>)</otherwise>
+      </choose>
+    </delete>
+
+    <!-- 根据店铺ID删除记录 -->
+    <delete id="deleteByShopId" parameterType="decimal">
+DELETE FROM t_shop_car_brand WHERE `shop_id` = #{value,jdbcType=NUMERIC}
+    </delete>
+
+    <!-- 根据店铺ID查询店铺车型品牌 -->
+    <select id="selectByShopId" resultMap="carBrand" parameterType="decimal">
+SELECT <include refid="carBrandPrefixCols">
+           <property name="tableName" value="tscb" />
+           <property name="colPrefix" value="" />
+       </include>,
+       <include refid="com.ych.shcm.o2o.dao.mybatis.CarBrandMapper.carBrandPrefixCols">
+           <property name="tableName" value="tcb" />
+           <property name="colPrefix" value="tcb_" />
+       </include>
+  FROM t_shop_car_brand AS tscb
+       JOIN t_car_brand AS tcb ON tcb.id = tscb.brand_id
+ WHERE shop_id = #{value,jdbcType=NUMERIC}
+ORDER BY tscb.first_char, tscb.name
+    </select>
+
+</mapper>
