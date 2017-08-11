@@ -125,7 +125,7 @@ shop_id
         </if>
         <include refid="selectOrderAppointmentListCondition"/>
         <choose>
-            <when test="sort != null and sort.length() > 0">ORDER BY `${sort}`
+            <when test="sort != null and sort.length() > 0"> ORDER BY `${sort}`
                 <if test="order != null">${order}</if>
             </when>
             <otherwise>
