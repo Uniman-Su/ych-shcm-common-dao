@@ -144,7 +144,8 @@ UPDATE t_order
             <if test="endTime != null">AND t.create_time &lt;=#{endTime,jdbcType=TIMESTAMP}</if>
             <if test="needInvoice == true">AND tb.id is not null</if>
             <if test="needInvoice == false">AND tb.id is null</if>
-
+            <if test="modifyTimeBegin != null">AND t.modify_time >= #{modifyTimeBegin,jdbcType=TIMESTAMP}</if>
+            <if test="modifyTimeEnd != null">AND t.modify_time &lt;= #{modifyTimeEnd,jdbcType=TIMESTAMP}</if>
         </where>
     </sql>
     <select id="selectOrderList_count" parameterType="com.ych.shcm.o2o.parameter.QueryOrderListParameter"
@@ -179,22 +180,15 @@ UPDATE t_order
                 <property name="colPrefix" value="tp_"/>
             </include>
         </if>
-        FROM t_order AS t LEFT JOIN t_order_bill_apply AS tb ON t.id = tb.order_id LEFT JOIN t_car as tc ON t.car_id =
-        tc.id
-        LEFT JOIN t_shop AS ts ON t.shop_id = ts.id
+        FROM t_order AS t
+             LEFT JOIN t_order_bill_apply AS tb ON t.id = tb.order_id
+             JOIN t_car as tc ON t.car_id = tc.id
+             JOIN t_shop AS ts ON t.shop_id = ts.id
         <if test="needPacks == true">
-            LEFT JOIN t_order_service_pack AS tp ON t.id = tp.order_id
+             JOIN t_order_service_pack AS tp ON t.id = tp.order_id
         </if>
         <include refid="selectOrderListCondition"/>
         ORDER BY t.create_time DESC
-        <!--<choose>-->
-        <!--<when test="sorts != null and sorts.size() > 0">ORDER BY `${sort}`-->
-        <!--<if test="order != null">${order}</if>-->
-        <!--</when>-->
-        <!--<otherwise>-->
-        <!---->
-        <!--</otherwise>-->
-        <!--</choose>-->
         LIMIT #{startIndex,jdbcType=NUMERIC}, #{pageSize,jdbcType=NUMERIC}
     </select>
 
