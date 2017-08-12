@@ -102,7 +102,7 @@ UPDATE t_order
 <if test="shopId != null">`shop_id`,</if>
 `car_id`,
 `money`,
-`service_provider_id`,
+<if test="serviceProviderId != null">`service_provider_id`,</if>
 `mileage`,
 `modifier_id`
         ) VALUES (
@@ -113,7 +113,7 @@ UPDATE t_order
         <if test="shopId != null">#{shopId,jdbcType=NUMERIC},</if>
         #{carId,jdbcType=NUMERIC},
         #{money,jdbcType=NUMERIC},
-        #{serviceProviderId,jdbcType=NUMERIC},
+        <if test="serviceProviderId != null">#{serviceProviderId,jdbcType=NUMERIC},</if>
         #{mileage,jdbcType=NUMERIC},
         #{modifierId,jdbcType=NUMERIC}
         )
