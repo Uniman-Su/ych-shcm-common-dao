@@ -99,7 +99,7 @@ UPDATE t_order
 `user_id`,
 `access_channel_id`,
 `status`,
-`shop_id`,
+<if test="shopId != null">`shop_id`,</if>
 `car_id`,
 `money`,
 `service_provider_id`,
@@ -110,7 +110,7 @@ UPDATE t_order
         #{userId,jdbcType=NUMERIC},
         #{accessChannelId,jdbcType=NUMERIC},
         #{status,jdbcType=NUMERIC},
-        #{shopId,jdbcType=NUMERIC},
+        <if test="shopId != null">#{shopId,jdbcType=NUMERIC},</if>
         #{carId,jdbcType=NUMERIC},
         #{money,jdbcType=NUMERIC},
         #{serviceProviderId,jdbcType=NUMERIC},
@@ -183,7 +183,7 @@ UPDATE t_order
         FROM t_order AS t
              LEFT JOIN t_order_bill_apply AS tb ON t.id = tb.order_id
              JOIN t_car as tc ON t.car_id = tc.id
-             JOIN t_shop AS ts ON t.shop_id = ts.id
+             LEFT JOIN t_shop AS ts ON t.shop_id = ts.id
         <if test="needPacks == true">
              JOIN t_order_service_pack AS tp ON t.id = tp.order_id
         </if>
