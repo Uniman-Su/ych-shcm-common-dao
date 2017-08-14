@@ -121,6 +121,15 @@ CURRENT_TIMESTAMP
         </include>
         FROM  t_order as `to` JOIN t_shop ts ON `to`.shop_id = ts.id JOIN  t_order_evaluation  te ON `to`.id = te.order_id
         <include refid="selectOrderEvaluationListCondition"/>
+        <choose>
+            <when test="sort != null and sort.length() > 0"> ORDER BY `${sort}`
+                <if test="order != null">${order}</if>
+            </when>
+            <otherwise>
+                ORDER BY id DESC
+            </otherwise>
+        </choose>
+        <if test="startIndex != null">LIMIT #{startIndex,jdbcType=NUMERIC}, #{pageSize,jdbcType=NUMERIC}</if>
     </select>
     <select id="selectOrderEvaluationList_count" parameterType="com.ych.shcm.o2o.parameter.QueryOrderListParameter"
             resultType="long">
