@@ -24,6 +24,9 @@
         <association property="orderServicePacks"
                      resultMap="com.ych.shcm.o2o.dao.mybatis.OrderServicePackMapper.orderServicePack"
                      columnPrefix="tp_"/>
+        <association property="orderBill"
+                     resultMap="com.ych.shcm.o2o.dao.mybatis.OrderBillMapper.orderBill"
+                     columnPrefix="tb_"/>
     </resultMap>
 
 
@@ -179,6 +182,13 @@ UPDATE t_order
                 <property name="tableName" value="tp"/>
                 <property name="colPrefix" value="tp_"/>
             </include>
+        </if>
+        <if test="needInvoice == true">
+        ,
+            <include refid="com.ych.shcm.o2o.dao.mybatis.OrderBillMapper.orderBillPrefixCols">
+            <property name="tableName" value="tb"/>
+            <property name="colPrefix" value="tb_"/>
+        </include>
         </if>
         FROM t_order AS t
              LEFT JOIN t_order_bill_apply AS tb ON t.id = tb.order_id
