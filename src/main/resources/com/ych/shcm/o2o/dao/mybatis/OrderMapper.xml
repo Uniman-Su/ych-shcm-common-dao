@@ -183,13 +183,11 @@ UPDATE t_order
                 <property name="colPrefix" value="tp_"/>
             </include>
         </if>
-        <if test="needInvoice == true">
-        ,
+         ,
             <include refid="com.ych.shcm.o2o.dao.mybatis.OrderBillMapper.orderBillPrefixCols">
             <property name="tableName" value="tb"/>
             <property name="colPrefix" value="tb_"/>
         </include>
-        </if>
         FROM t_order AS t
              LEFT JOIN t_order_bill_apply AS tb ON t.id = tb.order_id
              JOIN t_car as tc ON t.car_id = tc.id
