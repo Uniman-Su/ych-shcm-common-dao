@@ -209,7 +209,6 @@ INSERT INTO t_service_provider_settle_detail(
     <if test="settleDate != null">AND tssd.settle_date = #{settleDate,jdbcType=DATE}</if>
     <if test="settleDateBegin != null">AND tssd.settle_date >= #{settleDateBegin,jdbcType=DATE}</if>
     <if test="settleDateEnd != null">AND tssd.settle_date &lt;= #{settleDateEnd,jdbcType=DATE}</if>
-    <if test="serviceProviderId != null">AND tssd.service_provider_id = #{serviceProviderId,jdbcType=NUMERIC}</if>
 </where>
     </sql>
     <select id="selectDetailList" parameterType="com.ych.shcm.o2o.parameter.QueryShopSettleParameter" resultMap="settleDetail">
