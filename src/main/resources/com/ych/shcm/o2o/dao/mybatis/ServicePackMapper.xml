@@ -38,6 +38,14 @@
 `${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
 `${tableName}`.`modify_time` AS `${colPrefix}modify_time`
     </sql>
+    <sql id="servicePackWithoutDescPrefixCols">
+        `${tableName}`.`id` AS `${colPrefix}id`,
+        `${tableName}`.`name` AS `${colPrefix}name`,
+        `${tableName}`.`icon_path` AS `${colPrefix}icon_path`,
+        `${tableName}`.`status` AS `${colPrefix}status`,
+        `${tableName}`.`modifier_id` AS `${colPrefix}modifier_id`,
+        `${tableName}`.`modify_time` AS `${colPrefix}modify_time`
+    </sql>
 
     <!-- 查询服务包详情 -->
     <select id="selectById" parameterType="decimal" resultMap="servicePack">

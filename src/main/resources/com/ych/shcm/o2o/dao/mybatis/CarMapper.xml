@@ -14,6 +14,8 @@
         <result column="first_order_status" property="firstOrderStatus" jdbcType="NUMERIC" />
         <result column="first_mmoney" property="firstMaintenanceMoney" jdbcType="NUMERIC" />
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+        <result column="registration_time" property="registrationTime" jdbcType="TIMESTAMP" />
+        <result column="mileage" property="mileage" jdbcType="NUMERIC" />
     </resultMap>
 
     <!-- 车辆过期维护信息 -->
@@ -32,7 +34,9 @@
 `first_mtime`,
 `first_order_status`,
 `first_mmoney`,
-`create_time`
+`create_time`,
+`registration_time`,
+`mileage`
     </sql>
     <sql id="carPrefixCols">
 `${tableName}`.`id` AS `${colPrefix}id`,
@@ -44,7 +48,9 @@
 `${tableName}`.`first_mtime` AS `${colPrefix}first_mtime`,
 `${tableName}`.`first_order_status` AS `${colPrefix}first_order_status`,
 `${tableName}`.`first_mmoney` AS `${colPrefix}first_mmoney`,
-`${tableName}`.`create_time` AS `${colPrefix}create_time`
+`${tableName}`.`create_time` AS `${colPrefix}create_time`,
+`${tableName}`.`registration_time` AS `${colPrefix}registration_time`,
+`${tableName}`.`mileage` AS `${colPrefix}mileage`
     </sql>
 
     <!-- 车辆过期维护信息列 -->
@@ -67,7 +73,9 @@ INSERT INTO t_car (
 `first_order_id`,
 `first_mtime`,
 `first_order_status`,
-`first_mmoney`
+`first_mmoney`,
+`registration_time`,
+mileage
 ) VALUES (
 #{vin,jdbcType=VARCHAR},
 #{modelId,jdbcType=NUMERIC},
@@ -76,7 +84,9 @@ INSERT INTO t_car (
 #{firstOrderId,jdbcType=NUMERIC},
 #{firstMaintenanceTime,jdbcType=TIMESTAMP},
 #{firstOrderStatus,jdbcType=NUMERIC},
-#{firstMaintenanceMoney,jdbcType=NUMERIC}
+#{firstMaintenanceMoney,jdbcType=NUMERIC},
+#{registrationTime,jdbcType=TIMESTAMP},
+#{mileage,jdbcType=NUMERIC}
 )
     </insert>
 
@@ -90,7 +100,9 @@ UPDATE t_car
        `first_order_id` = #{firstOrderId,jdbcType=TIMESTAMP},
        `first_mtime` = #{firstMaintenanceTime,jdbcType=TIMESTAMP},
        `first_order_status` = #{firstOrderStatus,jdbcType=NUMERIC},
-       `first_mmoney` = #{firstMaintenanceMoney,jdbcType=NUMERIC}
+       `first_mmoney` = #{firstMaintenanceMoney,jdbcType=NUMERIC},
+       `registration_time` = #{registrationTime,jdbcType=TIMESTAMP},
+       `mileage` = #{mileage,jdbcType=NUMERIC}
  WHERE `id` = #{id,jdbcType=NUMERIC}
     </update>
 

@@ -192,7 +192,7 @@ SELECT COUNT(1)
 
     <select id="selectServicePackByGroupId" resultType="decimal" resultMap="com.ych.shcm.o2o.dao.mybatis.ServicePackMapper.servicePack">
 
-        SELECT  <include refid="com.ych.shcm.o2o.dao.mybatis.ServicePackMapper.servicePackPrefixCols">
+        SELECT  <include refid="com.ych.shcm.o2o.dao.mybatis.ServicePackMapper.servicePackWithoutDescPrefixCols">
         <property name="tableName" value="t2"/>
         <property name="colPrefix" value=""/>
     </include>,
